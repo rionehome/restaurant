@@ -1,4 +1,5 @@
-# coding=utf-8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import rospy
 import time
 from std_msgs.msg import String, Float64MultiArray, Int32
@@ -55,6 +56,7 @@ if __name__ == '__main__':
 	rospy.Subscriber("/restaurant/activate", Activate, activate_callback)
 	rospy.Subscriber("rest_find_sound/go_to_customer", String, find_sound_callback)
 	rospy.Subscriber("/move/amount/signal", Int32, move_signal_callback)
+
 	pub_next = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)
 	find_sound = rospy.Publisher("rest_find_sound/find_sound", String, queue_size=10)
 	find_human_image = rospy.Publisher("/human_detection/start", String, queue_size=10)
