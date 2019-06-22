@@ -1,6 +1,10 @@
 # restaurant_get_order
+##音声認識について
+現状ではpocket sphinxの使用を考えています。
+
 ## Overview
   restaurantにおける,対話者からのメッセージ処理を行う.
+  
 
 
 ## Description
