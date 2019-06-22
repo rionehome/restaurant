@@ -1,0 +1,3 @@
+<launch>
+  <node name="rest_find_sound_start" pkg="rest_find_sound" type="start.py" output="screen" />
+</launch>
