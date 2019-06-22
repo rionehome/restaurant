@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="restaurant_get_order" name="rest" type="rest_sphinx.py" output="screen" />
+  <node pkg="restaurant_get_order" name="resume" type="resume_sphinx.py" output="screen" />
+  <node pkg="restaurant_get_order" name="speak" type="speak.py" output="screen" />
+</launch>
