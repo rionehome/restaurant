@@ -19,9 +19,9 @@ def find_sound_callback(result):
 
 
 if __name__ == '__main__':
-	rospy.Subscriber("/help_me_carry/activate", Activate, activate_callback)
+	rospy.Subscriber("/restaurant/activate", Activate, activate_callback)
 	rospy.Subscriber("rest_find_sound/go_to_customer", String, find_sound_callback)
-	next = rospy.Publisher("/help_me_carry/activate", Activate, queue_size=10)
+	next = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)
 	find_sound = rospy.Publisher("rest_find_sound/find_sound", String, queue_size=10)
 	find_human_image = rospy.Publisher("/human_detection/start", String, queue_size=10)
 	find_human_image_method = rospy.Publisher("/human_detection/method", String, queue_size=10)
