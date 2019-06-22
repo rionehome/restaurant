@@ -3,7 +3,7 @@
 
 import rospy
 from std_msgs.msg import String, Bool
-from restaurant.msg import Order
+from restaurant_get_order.msg import Order
 import get_order
 import os
 import time
