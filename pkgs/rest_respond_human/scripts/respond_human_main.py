@@ -38,6 +38,9 @@ def find_sound_callback(result):
 		time.sleep(0.1)
 
 	print "finish"
+	next = Activate()
+	next.id = 1
+	pub_next.publish(next)
 
 
 def move_signal_callback(signal):
@@ -52,7 +55,7 @@ if __name__ == '__main__':
 	rospy.Subscriber("/restaurant/activate", Activate, activate_callback)
 	rospy.Subscriber("rest_find_sound/go_to_customer", String, find_sound_callback)
 	rospy.Subscriber("/move/amount/signal", Int32, move_signal_callback)
-	next = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)
+	pub_next = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)
 	find_sound = rospy.Publisher("rest_find_sound/find_sound", String, queue_size=10)
 	find_human_image = rospy.Publisher("/human_detection/start", String, queue_size=10)
 	find_human_image_method = rospy.Publisher("/human_detection/method", String, queue_size=10)
