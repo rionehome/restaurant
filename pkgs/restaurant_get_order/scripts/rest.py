@@ -17,6 +17,7 @@ def restaurant():
 	def start_restaurant(data):
 		if data.id == 1:
 			global start_flag
+			print "rest_get_order"
 			start_flag = True
 			main()
 

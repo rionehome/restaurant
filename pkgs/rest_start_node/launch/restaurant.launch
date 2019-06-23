@@ -3,10 +3,12 @@
 	<node pkg="emergency_stop" name="emergency_stop" output="screen" respawn="false" type="main.py"/>
 	
 	<include file="$(find freenect_launch)/launch/freenect.launch"/>
-	<include file="$(find turtlebot_custom)/launch/bringup.launch"/>
+	<include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
 	<include file="$(find turtlebot_custom)/launch/gmapping_lidar.launch"/>
+	<include file="$(find turtlebot_custom)/launch/lidar.launch"/>
 
 	<include file="$(find yes_no_recognition)/launch/yes_no_recognition.launch"/>
+
 	<include file="$(find sound_system)/launch/navigation_nlp.launch"/>
 	<include file="$(find sound_system)/launch/hotword.launch"/>
 	<include file="$(find navigation)/launch/navigation.launch"/>
@@ -17,5 +19,6 @@
     
     <include file="$(find rest_find_sound)/launch/rest_find_sound.launch"/>
     <node pkg="rest_respond_human" name="rest_respond_human" output="screen" respawn="false" type="respond_human_main.py"/>
+    <include file="$(find restaurant_get_order)/launch/rest_sphinx.launch"/>
 
 </launch>
