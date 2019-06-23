@@ -17,11 +17,6 @@ def restaurant():
         main()
         return
 
-    def speak_txt(txt):
-        start_speaking(txt)
-        while(finish_speaking_flag!=True):
-            continue
-        return
 
     
     def start_speaking(sentence):
@@ -66,7 +61,9 @@ def restaurant():
         while(1):
             if(start_flag!=False):
                 global take_ans, start_flag, loop_count, txt, finish_speaking_flag
-                speak_txt('May I take your order?')
+                start_speaking('May I take your order?')
+                while (finish_speaking_flag != True):
+		    continue
 
                 txt=''
                 get_txt('')
@@ -76,14 +73,20 @@ def restaurant():
                 take_ans=''
                 word_list=[]
                 word_list=get_order.main(txt.decode('utf-8'))
-                print(word_list)
-                #os.system("espeak 'Let me confirm your order'")
-                speak_txt('Let me confirm your order')
+                
+                start_speaking('Let me confirm your order')
+                while (finish_speaking_flag != True):
+		    continue
 
                 for i in word_list:
                     #os.system("espeak '{}'".format(i))
-                    speak_txt(i)
-                speak_txt('Is it OK?')
+                    start_speaking('{}'.format(i))
+                    while (finish_speaking_flag != True):
+		        continue
+    
+                start_speaking('Is it OK?')
+                while (finish_speaking_flag != True):
+		    continue
                 
                 get_yesno('')#聴きとった内容が正しいかを確認
                 while(take_ans!='yes' and take_ans!='no'):#yesかnoを聞き取るまで待機
@@ -91,7 +94,9 @@ def restaurant():
                 yes_no.publish(False)
                 if(take_ans=='yes'):
                     #os.system("espeak 'Sure'")
-                    speak_txt('Sure')
+                    start_speaking('Sure')
+                    while (finish_speaking_flag != True):
+		        continue
                     order.order=word_list
                     #send_order(Order)
                     start_flag=False
@@ -99,7 +104,9 @@ def restaurant():
                     break
                 #制御へ場所情報を送信.
                 else:
-                    speak_txt('Sorry, please say again your order')
+                    start_speaking('Sorry, please say again your order')
+                    while (finish_speaking_flag != True):
+		        continue
                     #os.system("espeak 'Sorry, please say again your order'")
                     txt=''
                     
