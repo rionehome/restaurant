@@ -1,7 +1,0 @@
-#JSGF V1.0;
-grammar menu_sphinx;
-public <rule> = [<sentence>] (<food> <and> <food> | <bevarage>);
-<sentence> = i want to | please;
-<food> = noodles | peanuts | potato | apple;
-<and> = and | with;
-<bevarage> = cola | coffee | juice | soda; 

@@ -10,7 +10,7 @@ sudo pip install pyusb
 
 * `/rest_find_sound/src/log/`：　発話の文のログが書き込まれます。
 
-* `/rest_find_sound/src/dictionary/`：　レストランで使うすべての単語辞書と文法辞書があります。
+* `/rest_find_sound/src/dictionary/`：　単語辞書と文法辞書があります。
 
 ## Usage
 
