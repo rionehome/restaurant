@@ -159,13 +159,13 @@ def restaurant():
                                         txt = ''
 
 	rospy.init_node('restaurant_getO', anonymous=True)
-	start_resume = rospy.Publisher('restaurant_getO/resume/start', Bool, queue_size=10)
+	start_resume = rospy.Publisher('restaurant_getO/recognition_start', Bool, queue_size=10)
 	yes_no = rospy.Publisher('yes_no/recognition_start', Bool, queue_size=10)
 	speak = rospy.Publisher('/restaurant_nlp/speak', String, queue_size=10)  # 発話開始
 
 	rospy.Subscriber('/restaurant/activate', Activate, start_restaurant)  # 起動用
 	rospy.Subscriber('yes_no/recognition_result', String, get_yesno)  # yes_no
-	rospy.Subscriber('restaurant_getO/resume/result', String, get_txt)  # 音声認識結果
+	rospy.Subscriber('restaurant_getO/recognition_result', String, get_txt)  # 音声認識結果
 	rospy.Subscriber('restaurant_nlp/finish_speaking', Bool, finish_speaking)  # 発話終了
 	rospy.Subscriber('/navigation/goal', Bool, talk_order)
 	rospy.spin()
