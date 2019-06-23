@@ -16,12 +16,8 @@ import getting_array
 class Restaurant_find_sound:
 	# 発話文のログファイル書き込みの関数
 	def log_file_spoke(self, sentence):
-		if os.path.exists(self.log_file_name) == True:
-			with open(self.log_file_name, "a") as f:
-				f.write(str(datetime.datetime.now()) + "\t" + "robot spoke:" + sentence + "\n")
-		else:
-			with open(self.log_file_name, "w") as f:
-				f.write(str(datetime.datetime.now()) + "\t" + "robot spoke:" + sentence + "\n")
+		with open(self.log_file_name, "a") as f:
+			f.write(str(datetime.datetime.now()) + "\t" + "robot spoke:" + sentence + "\n")
 
 	# 声がしたメッセージを受け取ったら、角度を取得し、発話し、角度の情報を送る
 	def find_sound(self, data):
@@ -51,7 +47,6 @@ class Restaurant_find_sound:
 		rospy.init_node('rest_find_sound_start', anonymous=True)
 		rospy.Subscriber('rest_find_sound/find_sound', String, self.find_sound)
 		self.pub = rospy.Publisher('rest_find_sound/go_to_customer', String, queue_size=10)  # 制御に客まで行くメッセージを投げる
-		self.log_file_flag = False  # ログファイルを書き込みか追加か判定する
 		self.log_file_name = "{}/log{}.txt".format(os.path.join(os.path.dirname(os.path.abspath(__file__)), "log"),
 												   datetime.datetime.now())
 
