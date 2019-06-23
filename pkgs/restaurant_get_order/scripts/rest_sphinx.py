@@ -11,6 +11,7 @@ import os
 import time
 
 order = Order()
+start_flag = False
 
 
 def restaurant():
@@ -54,56 +55,55 @@ def restaurant():
 		time.sleep(1)
 		yes_no.publish(True)
 
-        #キッチン到着後のオーダー復唱
-        def talk_order(data):
-                global take_ans
-                while(1):
-                        start_speaking('Order of Table A is')
-                        while(finish_speaking_flag!=True):
-                                continue
-                        #オーダーを列挙していく(mainの引数で要変更)
-                        for i in word_list:
-                                start_speaking('{}'.format(i))
-                                while(finish_speaking_flag!=True):
-                                        continue
-                        start_speaking('Is it OK?')
-                        while(finish_speaking_flag!=True):
-                                continue
-                        take_ans=''
-                        get_yesno('')
-                        while(take_ans != 'yes' and take_ans != 'no'):
-                                continue
-                        yes_no.publish(False)
-                        if(take_ans== 'yes' ):
-                                #次のノードへの通信の記述をお願いします
-                                rospy.wait_for_service("/hotword/detect", timeout=1)
-		                print "hotword待機"
-		                rospy.ServiceProxy("/hotword/detect", HotwordService)()
-                                start_speaking('Please put order on the tray')
-                                while(finish_speaking_flag!=True):
-                                        continue
-                                while(1):
-                                        time.sleep(5)#商品が置かれるまで5秒待機
-                                        start_speaking('Did you put order on the tray?')
-                                        while(finish_speaking_flag!=True):
-                                                continue
-                                        get_yesno('')
-                                        while(take_ans != 'yes' and take_ans != 'no'):
-                                                continue
-                                        yes_no.publish(False)
-                                        if(take_ans=='yes'):
-                                                #次への通信を書いてください
-                                                
-                                                pass
-                                        else:
-                                                continue
+	# キッチン到着後のオーダー復唱
+	def talk_order(data):
+		global take_ans
+		while (1):
+			start_speaking('Order of Table A is')
+			while (finish_speaking_flag != True):
+				continue
+			# オーダーを列挙していく(mainの引数で要変更)
+			for i in word_list:
+				start_speaking('{}'.format(i))
+				while (finish_speaking_flag != True):
+					continue
+			start_speaking('Is it OK?')
+			while (finish_speaking_flag != True):
+				continue
+			take_ans = ''
+			get_yesno('')
+			while (take_ans != 'yes' and take_ans != 'no'):
+				continue
+			yes_no.publish(False)
+			if (take_ans == 'yes'):
+				rospy.wait_for_service("/hotword/detect", timeout=1)
+				print "hotword待機"
+				rospy.ServiceProxy("/hotword/detect", HotwordService)()
 
-                                
-                                break
-                        else:
-                                start_speaking('I say order again')
-                                while(finish_speaking_flag!=True):
-                                        continue
+				start_speaking('Please put order on the tray')
+				while (finish_speaking_flag != True):
+					continue
+				while (1):
+					time.sleep(5)  # 商品が置かれるまで5秒待機
+					start_speaking('Did you put order on the tray?')
+					while (finish_speaking_flag != True):
+						continue
+					get_yesno('')
+					while (take_ans != 'yes' and take_ans != 'no'):
+						continue
+					yes_no.publish(False)
+					if (take_ans == 'yes'):
+						# 次への通信を書いてください
+
+						pass
+					else:
+						continue
+
+				break
+			else:
+				start_speaking('I say order again')
+				while (finish_speaking_flag != True):
+					continue
 
 	def main():
 		while (1):
@@ -117,7 +117,7 @@ def restaurant():
 				get_txt('')
 				while (txt == ''):  # txt取得まで待機
 					continue
-				
+
 				take_ans = ''
 				word_list = []
 				word_list = get_order.main(txt.decode('utf-8'))
@@ -167,7 +167,7 @@ def restaurant():
 	rospy.Subscriber('yes_no/recognition_result', String, get_yesno)  # yes_no
 	rospy.Subscriber('restaurant_getO/resume/result', String, get_txt)  # 音声認識結果
 	rospy.Subscriber('restaurant_nlp/finish_speaking', Bool, finish_speaking)  # 発話終了
-        rospy.Subscriber('/navigation/goal', Bool, talk_order)
+	rospy.Subscriber('/navigation/goal', Bool, talk_order)
 	rospy.spin()
 
 
