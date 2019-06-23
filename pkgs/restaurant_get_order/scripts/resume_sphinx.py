@@ -39,6 +39,7 @@ class Recognition:
 		for text in speech:
 			score = text.confidence()
 			if score > 0.1:
+                                self.speech_recognition=False
 				text = str(text)
 				self.pub.publish(text)  # 音声認識の結果をpublish
 				break
