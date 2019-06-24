@@ -1,0 +1,3 @@
+<launch>
+  <node name="rest_here_you_are_main" pkg="rest_here_you_are" type="main.py" output="screen" />
+</launch>
