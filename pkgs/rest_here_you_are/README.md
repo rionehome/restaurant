@@ -9,6 +9,8 @@
 
 * `/rest_here_you_are/src/dictionary/`：　単語辞書と文法辞書があります。
 
+* `/rest_here_you_are/src/beep/`：　ビープ音のwavファイルがあります。
+
 ## Usage
 
 ```
@@ -19,10 +21,10 @@ roslaunch rest_here_you_are rest_here_you_are.launch
 **`name` rest_here_you_are_main**
 
 ### Subscribe Topic
-* **`/rest_here_you_are/reach_customer`** Hotwordの受け取り （ rest_start_node.msg/Activate ）
+* **`/rest_here_you_are/reach_customer`** テーブルに着いたメッセージを受け取る （ rest_start_node.msg/Activate ）
 
 ### Publish Topic
-* **`/rest_here_you_are/go_to_kitchen`** お客さんがいる方向の角度を送信 ( rest_start_node.msg/Activate )
+* **`/rest_here_you_are/go_to_kitchen`** お客さんが商品を受け取った ( rest_start_node.msg/Activate )
 
 
 

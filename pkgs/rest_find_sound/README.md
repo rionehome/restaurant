@@ -12,6 +12,8 @@ sudo pip install pyusb
 
 * `/rest_find_sound/src/dictionary/`：　単語辞書と文法辞書があります。
 
+* `/rest_find_sound/src/beep/`：　wavファイルがあります。
+
 ## Usage
 
 ```
@@ -22,10 +24,10 @@ roslaunch rest_find_sound rest_find_sound.launch
 **`name` rest_find_sound_start**
 
 ### Subscribe Topic
-* **`rest_find_sound/find_sound`** Hotwordの受け取り （ std_msgs/String ）
+* **`/rest_find_sound/find_sound`** 音声認識待機の合図の受け取り （ rest_start_node.msg/Activate ）
 
 ### Publish Topic
-* **`rest_find_sound/go_to_customer`** お客さんがいる方向の角度を送信 ( std_msgs/String )
+* **`/rest_find_sound/go_to_customer`** お客さんがいる方向の角度を送信 ( rest_start_node.msg/Activate )
 
 
 

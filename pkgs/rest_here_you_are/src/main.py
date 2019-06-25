@@ -76,23 +76,26 @@ class Take:
 			speak_text = "Did you take items?"
 			self.speak(speak_text)
 			self.log_file(speak_text, "s")
+			rospy.loginfo("robot spoke: %s", speak_text)
 			self.yes_no_resume()
 			text = self.recognition()
 			self.pause()
 			if text == "yes":
 				self.log_file("yes", "h")
-				speak_text = "Thank you. I will back to kitchen."
+				speak_text = "Thank you."
 				self.speak(speak_text)
 				self.log_file(speak_text, "s")
+				rospy.loginfo("robot spoke: %s", speak_text)
 				act = Activate()
 				act.id = 102
-				self.pub.publish(act) # キッチンに戻る
+				self.pub.publish(act) # 商品を渡し終えたメッセージを送信
 				break
 			else:
 				self.log_file("no", "h")
 				speak_text = "OK."
 				self.speak(speak_text)
 				self.log_file(speak_text, "s")
+				rospy.loginfo("robot spoke: %s", speak_text)
 				time.sleep(5)
 
 	def __init__(self):
