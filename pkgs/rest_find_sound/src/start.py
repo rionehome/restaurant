@@ -48,8 +48,8 @@ class Restaurant_find_sound:
 
 	def __init__(self):
 		rospy.init_node('rest_find_sound_start', anonymous=True)
-		rospy.Subscriber('/rest_find_sound/find_sound', Activate, self.find_sound)
-		self.pub = rospy.Publisher('/rest_find_sound/go_to_customer', Activate, queue_size=10) # お客さんの声の角度を送る
+		rospy.Subscriber('/restaurant/activate', Activate, self.find_sound)
+		self.pub = rospy.Publisher('/restaurant/activate', Activate, queue_size=10) # お客さんの声の角度を送る
 		self.log_file_name = "{}/log{}.txt".format(os.path.join(os.path.dirname(os.path.abspath(__file__)), "log"), datetime.datetime.now())
 		rospy.spin()
 

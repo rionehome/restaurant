@@ -50,6 +50,7 @@ class Take:
 			score = text.confidence()
 			if score > 0.1:
 				text = str(text)
+				print text
 				return text
 			else:
 				print("**noise**")
@@ -61,7 +62,7 @@ class Take:
 			self.log_file(sentence, "s")
 			rospy.loginfo("robot spoke: %s", sentence)
 			self.speak(sentence)
-			time.sleep(5)
+			time.sleep(10)
 			self.speech_recognition = True # yes no を受け取る
 
 	# speech_recognitionがTrueになるまで待機するcallback関数
@@ -100,8 +101,8 @@ class Take:
 
 	def __init__(self):
 		rospy.init_node('rest_here_you_are_main', anonymous=True)
-		rospy.Subscriber('/rest_here_you_are/reach_customer', Activate, self.reach_customer)
-		self.pub = rospy.Publisher('/rest_here_you_are/go_to_kitchen', Activate, queue_size=10) # キッチンに戻る
+		rospy.Subscriber('/restaurant/activate', Activate, self.reach_customer)
+		self.pub = rospy.Publisher('/restaurant/activate', Activate, queue_size=10) # キッチンに戻る
 		self.model_path = '/usr/local/lib/python2.7/dist-packages/pocketsphinx/model' # 音響モデルのディレクトリの絶対パス
 		self.dictionary_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dictionary') # 辞書のディレクトリの絶対パス
 		self.log_file_name = "{}/log{}.txt".format(os.path.join(os.path.dirname(os.path.abspath(__file__)), "log"), datetime.datetime.now())

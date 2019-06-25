@@ -21,10 +21,10 @@ roslaunch rest_here_you_are rest_here_you_are.launch
 **`name` rest_here_you_are_main**
 
 ### Subscribe Topic
-* **`/rest_here_you_are/reach_customer`** テーブルに着いたメッセージを受け取る （ rest_start_node.msg/Activate ）
+* **`/restaurant/activate`** テーブルに着いたメッセージを受け取る （ rest_start_node.msg/Activate ）
 
 ### Publish Topic
-* **`/rest_here_you_are/go_to_kitchen`** お客さんが商品を受け取った ( rest_start_node.msg/Activate )
+* **`/restaurant/activate`** お客さんが商品を受け取った ( rest_start_node.msg/Activate )
 
 
 
