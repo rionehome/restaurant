@@ -19,31 +19,32 @@ class Restaurant_find_sound:
 			f.write(str(datetime.datetime.now()) + "\t" + "robot spoke:" + sentence + "\n")
 
 	def find_sound(self, data):
-		# Hotword 検出処理
-		rospy.wait_for_service("/hotword/detect", timeout=1)
-		print "hotword待機"
-		rospy.ServiceProxy("/hotword/detect", HotwordService)()
+		if data.id == 99:
+			# Hotword 検出処理
+			rospy.wait_for_service("/hotword/detect", timeout=1)
+			print "hotword待機"
+			rospy.ServiceProxy("/hotword/detect", HotwordService)()
 
-		angle = getting_array.read('DOAANGLE')
-		subprocess.call('amixer sset Master 85% -q --quiet', shell=True)  # 大声
-		sentence = "I will go"
-		self.log_file_spoke(sentence)
-		rospy.loginfo("robot spoke: %s", sentence)
-		# ビープ音のディレクトリの絶対パスを変数に設定
-		beep_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'beep')
-		# PATH_beep_start = os.path.join(beep_path, 'start.wav')
-		# PATH_beep_stop = os.path.join(beep_path, 'stop.wav')
-		speech_wave = os.path.join(beep_path, 'speech.wav')
-		# subprocess.call('aplay -q --quiet {}'.format(PATH_beep_stop), shell=True)
-		subprocess.call(['pico2wave', '-w={}'.format(speech_wave), sentence])
-		subprocess.call('aplay -q --quiet {}'.format(speech_wave), shell=True)
-		subprocess.call('amixer sset Master 75% -q --quiet', shell=True)  # 声の大きさを戻す
-		angle = str(angle)
-		act = Activate()
-		act.id = 100
-		act.text = angle # 角度を送信
-		self.pub.publish(act)
-		print(angle)
+			angle = getting_array.read('DOAANGLE')
+			subprocess.call('amixer sset Master 85% -q --quiet', shell=True)  # 大声
+			sentence = "I will go"
+			self.log_file_spoke(sentence)
+			rospy.loginfo("robot spoke: %s", sentence)
+			# ビープ音のディレクトリの絶対パスを変数に設定
+			beep_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'beep')
+			# PATH_beep_start = os.path.join(beep_path, 'start.wav')
+			# PATH_beep_stop = os.path.join(beep_path, 'stop.wav')
+			speech_wave = os.path.join(beep_path, 'speech.wav')
+			# subprocess.call('aplay -q --quiet {}'.format(PATH_beep_stop), shell=True)
+			subprocess.call(['pico2wave', '-w={}'.format(speech_wave), sentence])
+			subprocess.call('aplay -q --quiet {}'.format(speech_wave), shell=True)
+			subprocess.call('amixer sset Master 75% -q --quiet', shell=True)  # 声の大きさを戻す
+			angle = str(angle)
+			act = Activate()
+			act.id = 100
+			act.text = angle # 角度を送信
+			self.pub.publish(act)
+			print(angle)
 
 	def __init__(self):
 		rospy.init_node('rest_find_sound_start', anonymous=True)
