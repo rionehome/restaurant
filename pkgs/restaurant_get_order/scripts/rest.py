@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import rospy
+from sound_system.srv import NLPService
 from std_msgs.msg import String, Bool
 from restaurant_get_order.msg import Order
 import get_order
@@ -10,6 +11,7 @@ from rest_start_node.msg import Activate
 import time
 
 order = Order()
+start_flag = False
 
 
 def restaurant():
@@ -20,6 +22,30 @@ def restaurant():
 			print "rest_get_order"
 			start_flag = True
 			main()
+
+	def send_place_msg(place):
+		# navigationに場所を伝える
+		rospy.wait_for_service('/sound_system/nlp', timeout=1)
+		response = rospy.ServiceProxy('/sound_system/nlp', NLPService)('Please go to {}'.format(place))
+		print response.response
+		if "OK" in response.response:
+			navigation_wait = True
+			while navigation_wait:
+				time.sleep(0.1)
+		else:
+			# 次のノードに処理を渡す
+			next = Activate()
+			next.id = 2
+			activate_pub.publish(next)
+
+	def navigation_goal_callback(data):
+		global start_flag
+		if start_flag:
+			# 次のノードに処理を渡す
+			next = Activate()
+			next.id = 2
+			activate_pub.publish(next)
+			start_flag = False
 
 	def speak_txt(txt):
 		start_speaking(txt)
@@ -94,8 +120,9 @@ def restaurant():
 					# send_order(Order)
 					start_flag = False
 					txt = ''
-					break
-				# 制御へ場所情報を送信.
+					# 制御へ場所情報を送信
+					send_place_msg("kitchen")
+					return
 				else:
 					speak_txt('Sorry, please say again your order')
 					# os.system("espeak 'Sorry, please say again your order'")
@@ -105,11 +132,13 @@ def restaurant():
 	start_resume = rospy.Publisher('/sound_system/recognition', String, queue_size=10)
 	yes_no = rospy.Publisher('yes_no/recognition_start', Bool, queue_size=10)
 	speak = rospy.Publisher('/restaurant_nlp/speak', String, queue_size=10)  # 発話開始
+	activate_pub = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)
 
 	rospy.Subscriber('/restaurant/activate', Activate, start_restaurant)  # 起動用
 	rospy.Subscriber('yes_no/recognition_result', String, get_yesno)  # yes_no
 	rospy.Subscriber('sound_system/recognition/result', String, get_txt)  # 音声認識結果
 	rospy.Subscriber('restaurant_nlp/finish_speaking', Bool, finish_speaking)  # 発話終了
+	rospy.Subscriber('/navigation/goal', Bool, navigation_goal_callback)
 	rospy.spin()
 
 
