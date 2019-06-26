@@ -6,6 +6,7 @@
 	<include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
 	<include file="$(find turtlebot_custom)/launch/gmapping_lidar.launch"/>
 	<include file="$(find turtlebot_custom)/launch/lidar.launch"/>
+	<include file="$(find tfpose_ros)/launch/kinect.launch"/>
 
 	<include file="$(find yes_no_recognition)/launch/yes_no_recognition.launch"/>
 
@@ -16,9 +17,11 @@
 	<node pkg="move" name="MovementVelocityDesignation" output="screen" respawn="false" type="MovementVelocityDesignation"/>
 	<node pkg="move" name="MovementAmountDesignation" output="screen" respawn="false" type="MovementAmountDesignation"/>
     <node pkg="human_detection" name="human_detection" output="screen" respawn="false" type="human_detection_main"/>
-    
-    <include file="$(find rest_find_sound)/launch/rest_find_sound.launch"/>
-    <node pkg="rest_respond_human" name="rest_respond_human" output="screen" respawn="false" type="respond_human_main.py"/>
+   	<node pkg="call_ducker" name="call_ducker" output="screen" respawn="false" type="main.py"/>
+	<node pkg="rest_call_ducker" name="rest_call_ducker" output="screen" respawn="false" type="rest_call_ducker.py"/>
+
+    <!-- <include file="$(find rest_find_sound)/launch/rest_find_sound.launch"/> -->
+    <!-- <node pkg="rest_respond_human" name="rest_respond_human" output="screen" respawn="false" type="respond_human_main.py"/> -->
     <include file="$(find restaurant_get_order)/launch/rest_sphinx.launch"/>
 
 </launch>

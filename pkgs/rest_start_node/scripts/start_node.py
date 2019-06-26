@@ -10,6 +10,6 @@ if __name__ == '__main__':
 
 	pub = rospy.Publisher('/restaurant/activate', Activate, queue_size=10)
 	time.sleep(1)
-	next = Activate()
-	next.id = 0
-	pub.publish(next)
+	activate = Activate()
+	activate.id = 0
+	pub.publish(activate)
