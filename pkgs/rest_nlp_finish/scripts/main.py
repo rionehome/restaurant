@@ -3,7 +3,6 @@
 # レストラン終了の音声認識、発話
 
 import rospy
-from std_msgs.msg import String, Bool
 from rest_start_node.msg import Activate
 import os
 import subprocess
@@ -12,6 +11,19 @@ import datetime
 
 
 class Rest_Finish:
+	def __init__(self):
+		rospy.init_node('rest_nlp_finish_main', anonymous=True)
+		self.model_path = '/usr/local/lib/python2.7/dist-packages/pocketsphinx/model'  # 音響モデルのディレクトリの絶対パス
+		self.dictionary_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dictionary')  # 辞書のディレクトリの絶対パス
+		self.log_file_name = "{}/log{}.txt".format(os.path.join(os.path.dirname(os.path.abspath(__file__)), "log"),
+												   datetime.datetime.now())
+		self.pub = rospy.Publisher('/restaurant/activate', Activate, queue_size=10)  # Restaurant終了
+		rospy.Subscriber('/restaurant/activate', Activate, self.control)  # キッチンに戻ってきたらレストランをストップする音声認識開始
+		self.speech = None
+		self.speech_recognition = False
+		print('== STOP RECOGNITION ==')
+		self.main()
+
 	def command_resume(self):
 		print('== START RECOGNITION ==')
 		self.speech = LiveSpeech(
@@ -103,20 +115,7 @@ class Rest_Finish:
 				self.speak(speak_text)
 				self.log_file(speak_text, "s")
 
-	def __init__(self):
-		rospy.init_node('rest_nlp_finish_main', anonymous=True)
-		self.model_path = '/usr/local/lib/python2.7/dist-packages/pocketsphinx/model'  # 音響モデルのディレクトリの絶対パス
-		self.dictionary_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dictionary')  # 辞書のディレクトリの絶対パス
-		self.log_file_name = "{}/log{}.txt".format(os.path.join(os.path.dirname(os.path.abspath(__file__)), "log"),
-												   datetime.datetime.now())
-		self.pub = rospy.Publisher('/restaurant/activate', Activate, queue_size=10)  # Restaurant終了
-		rospy.Subscriber('/restaurant/activate', Activate, self.control)  # キッチンに戻ってきたらレストランをストップする音声認識開始
-		self.speech = None
-		self.speech_recognition = False
-		print('== STOP RECOGNITION ==')
-		self.main()
-		rospy.spin()
-
 
 if __name__ == '__main__':
 	Rest_Finish()
+	rospy.spin()
