@@ -78,9 +78,14 @@ class RestGetOrder:
 		time.sleep(1)
 		self.yes_no.publish(True)
 
-	# キッチン到着後のオーダー復唱
-	def talk_order(self):
+	# navigation終了
+	def talk_order(self, data):
+		# type: (Bool) -> None
+		print data
 		if not self.activate_flag:
+			return
+
+		if not data.data:
 			return
 
 		if self.place == "table":
