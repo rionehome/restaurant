@@ -3,17 +3,34 @@
 # Restaurant Here you are
 
 import rospy
-from sound_system.srv import NLPService
-from std_msgs.msg import String, Bool
+from sound_system.srv import NLPService, StringService
+from std_msgs.msg import Bool
 from rest_start_node.msg import Activate
 import time
 import datetime
 import os
-import subprocess
 from pocketsphinx import LiveSpeech
 
 
-class Take:
+class HereYouAre:
+
+	def __init__(self, activate_id):
+		rospy.init_node("rest_here_you_are")
+		rospy.Subscriber("/restaurant/activate", Activate, self.reach_customer)
+		rospy.Subscriber("/navigation/goal", Bool, self.navigation_callback)
+
+		self.activate_pub = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)  # キッチンに戻る
+		self.model_path = "/usr/local/lib/python2.7/dist-packages/pocketsphinx/model"  # 音響モデルのディレクトリの絶対パス
+		self.dictionary_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dictionary")  # 辞書のディレクトリの絶対パス
+
+		self.id = activate_id
+		self.activate_flag = False
+		self.speak_topic = "/sound_system/speak"
+		self.log_file_name = "{}/log{}.txt".format(os.path.join(os.path.dirname(os.path.abspath(__file__)), "log"),
+												   datetime.datetime.now())
+
+		self.main()
+
 	# ログファイルの書き込みの関数
 	def log_file(self, sentence, judge):
 		with open(self.log_file_name, "a") as f:
@@ -22,30 +39,31 @@ class Take:
 			elif judge == "s":
 				f.write(str(datetime.datetime.now()) + "\t" + "robot spoke:" + sentence + "\n")
 
-	def send_place_msg(self, place):
-		# navigationに場所を伝える
-		rospy.wait_for_service('/sound_system/nlp', timeout=1)
-		response = rospy.ServiceProxy('/sound_system/nlp', NLPService)('Please go to {}'.format(place))
-		print response.response
-		if "OK" in response.response:
-			self.navigation_wait = True
-			while self.navigation_wait:
-				time.sleep(0.1)
-		else:
-			# 次のノードに処理を渡す
-			next = Activate()
-			next.id = 2
-			self.pub.publish(next)
+	def speak(self, sentence):
+		# type: (str) -> None
+		"""
+		発話関数
+		:param sentence:
+		:return:
+		"""
+		rospy.wait_for_service(self.speak_topic)
+		rospy.ServiceProxy(self.speak_topic, StringService)(sentence)
 
-	# 発話
-	def speak(self, text):
-		beep_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'beep')
-		# PATH_beep_start = os.path.join(beep_path, 'start.wav')
-		# PATH_beep_stop = os.path.join(beep_path, 'stop.wav')
-		speech_wave = os.path.join(beep_path, 'speech.wav')
-		# subprocess.call('aplay -q --quiet {}'.format(PATH_beep_stop), shell=True)
-		subprocess.call(['pico2wave', '-w={}'.format(speech_wave), text])
-		subprocess.call('aplay -q --quiet {}'.format(speech_wave), shell=True)
+	def send_place_msg(self, place):
+		# type: (str) -> None
+		"""
+		navigationに場所を伝える
+		:param place:
+		:return:
+		"""
+		rospy.wait_for_service("/sound_system/nlp", timeout=1)
+		response = rospy.ServiceProxy("/sound_system/nlp", NLPService)('Please go to {}'.format(place))
+		print response.response
+		if "OK" not in response.response:
+			# 次のノードに処理を渡す
+			activate = Activate()
+			activate.id = self.id + 1
+			self.activate_pub.publish(activate)
 
 	def yes_no_resume(self):
 		print('== START RECOGNITION ==')
@@ -73,11 +91,14 @@ class Take:
 				print("**noise**")
 
 	def navigation_callback(self, data):
-		if self.speech_recognition:
-			self.navigation_wait = False
-			act = Activate()
-			act.id = 3
-			self.pub.publish(act)  # 商品を渡し終えたメッセージを送信
+		if not self.activate_flag:
+			return
+
+		print data
+		self.navigation_wait = False
+		activate = Activate()
+		activate.id = self.id + 1
+		self.activate_pub.publish(activate)  # 商品を渡し終えたメッセージを送信
 
 	# メッセージを受け取ったら、「Here you are」の発話
 	def reach_customer(self, data):
@@ -87,17 +108,18 @@ class Take:
 			rospy.loginfo("robot spoke: %s", sentence)
 			self.speak(sentence)
 			time.sleep(10)
-			self.speech_recognition = True  # yes no を受け取る
 
-	# speech_recognitionがTrueになるまで待機するcallback関数
+			self.activate_flag = True  # yes no を受け取る
+
+	# activate_flagがTrueになるまで待機するcallback関数
 	def judge(self):
-		while 1:
-			if self.speech_recognition == True:
+		while True:
+			if self.activate_flag:
 				break
 
 	def main(self):
 		self.judge()
-		while 1:
+		while True:
 			speak_text = "Did you take items?"
 			self.speak(speak_text)
 			self.log_file(speak_text, "s")
@@ -121,20 +143,7 @@ class Take:
 				rospy.loginfo("robot spoke: %s", speak_text)
 				time.sleep(5)
 
-	def __init__(self):
-		rospy.init_node('rest_here_you_are_main', anonymous=True)
-		rospy.Subscriber('/restaurant/activate', Activate, self.reach_customer)
-		rospy.Subscriber('/navigation/goal', Bool, self.navigation_callback)
-		self.pub = rospy.Publisher('/restaurant/activate', Activate, queue_size=10)  # キッチンに戻る
-		self.model_path = '/usr/local/lib/python2.7/dist-packages/pocketsphinx/model'  # 音響モデルのディレクトリの絶対パス
-		self.dictionary_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dictionary')  # 辞書のディレクトリの絶対パス
-		self.log_file_name = "{}/log{}.txt".format(os.path.join(os.path.dirname(os.path.abspath(__file__)), "log"),
-												   datetime.datetime.now())
-		self.speech_recognition = False
-		self.main()
-		self.navigation_wait = False
-		rospy.spin()
-
 
 if __name__ == '__main__':
-	Take()
+	HereYouAre(2)
+	rospy.spin()
