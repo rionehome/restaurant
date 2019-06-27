@@ -95,7 +95,6 @@ class HereYouAre:
 			return
 
 		print data
-		self.navigation_wait = False
 		activate = Activate()
 		activate.id = self.id + 1
 		self.activate_pub.publish(activate)  # 商品を渡し終えたメッセージを送信
