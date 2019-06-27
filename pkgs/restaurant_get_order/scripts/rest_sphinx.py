@@ -85,9 +85,6 @@ class RestGetOrder:
 		if not self.activate_flag:
 			return
 
-		if not data.data:
-			return
-
 		if self.place == "table":
 			activate = Activate()
 			activate.id = self.id + 1
