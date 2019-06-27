@@ -25,6 +25,8 @@ class RestGetOrder:
 
 		self.id = activate_id
 		self.txt = ""
+		self.finish_speaking_flag = False
+		self.take_answer = ""
 		self.word_list = []
 		self.place = "start_position"
 		self.speak_topic = "/sound_system/speak"
@@ -55,12 +57,9 @@ class RestGetOrder:
 		rospy.wait_for_service(self.speak_topic)
 		rospy.ServiceProxy(self.speak_topic, StringService)(sentence)
 
-	@staticmethod
-	def finish_speaking(data):
-		global finish_speaking_flag
+	def finish_speaking(self, data):
 		if data.data:
-			finish_speaking_flag = True
-			return
+			self.finish_speaking_flag = True
 
 	# 音声認識結果の取得
 	def get_txt(self, sentence):
@@ -72,9 +71,8 @@ class RestGetOrder:
 
 	# yes/noの音声認識結果の取得
 	def get_yesno(self, sentence):
-		global take_ans
-		if sentence != "":
-			take_ans = sentence.data
+		if not sentence == "":
+			self.take_answer = sentence.data
 			return
 		print('I\'m taking yes or no...')
 		time.sleep(1)
@@ -101,12 +99,12 @@ class RestGetOrder:
 			for i in self.word_list:
 				self.start_speaking('{}'.format(i))
 			self.start_speaking('Is it OK?')
-			take_answer = ""
+			self.take_answer = ""
 			self.get_yesno("")
-			while not take_answer == 'yes' and not take_answer == 'no':
+			while not self.take_answer == 'yes' and not self.take_answer == 'no':
 				continue
 			self.yes_no.publish(False)
-			if take_answer == 'yes':
+			if self.take_answer == 'yes':
 				rospy.wait_for_service("/hotword/detect", timeout=1)
 				print "hotword待機"
 				rospy.ServiceProxy("/hotword/detect", HotwordService)()
@@ -116,10 +114,10 @@ class RestGetOrder:
 					time.sleep(5)  # 商品が置かれるまで5秒待機
 					self.start_speaking('Did you put order on the tray?')
 					self.get_yesno("")
-					while not take_answer == 'yes' and not take_answer == 'no':
+					while not self.take_answer == 'yes' and not self.take_answer == 'no':
 						continue
 					self.yes_no.publish(False)
-					if take_answer == 'yes':
+					if self.take_answer == 'yes':
 						# 次への通信を書いてください
 						# 制御へ場所情報を送信.
 						self.place = "table"
@@ -139,7 +137,7 @@ class RestGetOrder:
 			while self.txt == "":  # txt取得まで待機
 				continue
 
-			take_answer = ""
+			self.take_answer = ""
 			self.word_list = get_order.main(self.txt.decode('utf-8'))
 
 			self.start_speaking('Let me confirm your order')
@@ -150,11 +148,11 @@ class RestGetOrder:
 			self.start_speaking('Is it OK?')
 
 			self.get_yesno("")  # 聴きとった内容が正しいかを確認
-			while not take_answer == 'yes' and not take_answer == 'no':  # yesかnoを聞き取るまで待機
+			while not self.take_answer == 'yes' and not self.take_answer == 'no':  # yesかnoを聞き取るまで待機
 				continue
 
 			self.yes_no.publish(False)
-			if take_answer == 'yes':
+			if self.take_answer == 'yes':
 				self.start_speaking("Sure")
 				# 制御へ場所情報を送信.
 				self.place = "kitchen"
