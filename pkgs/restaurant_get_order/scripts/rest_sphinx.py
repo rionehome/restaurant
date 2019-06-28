@@ -13,26 +13,19 @@ from collections import defaultdict
 class RestGetOrder:
 	def __init__(self, activate_id):
 		rospy.init_node("restaurant_get_order")
-		self.start_resume = rospy.Publisher("restaurant_getO/recognition_start", Bool, queue_size=10)
-		self.yes_no_pub = rospy.Publisher("yes_no/recognition_start", Bool, queue_size=10)
 		self.activate_pub = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)
 		self.change_dict_pub = rospy.Publisher("/sound_system/sphinx/dict", String, queue_size=10)
 		self.change_gram_pub = rospy.Publisher("/sound_system/sphinx/gram", String, queue_size=10)
 
 		rospy.Subscriber("/restaurant/activate", Activate, self.start_restaurant)  # 起動用
-		rospy.Subscriber("yes_no/recognition_result", String, self.get_yesno)  # yes_no
-		rospy.Subscriber("restaurant_getO/recognition_result", String, self.get_txt)  # 音声認識結果
 		rospy.Subscriber("/navigation/goal", Bool, self.talk_order)
 
 		self.id = activate_id
-		self.txt = ""  # 音声認識の文字列を格納
-		self.take_answer = ""
 		self.word_list = []  # 音声認識文からオーダを抽出
 		self.menu_list = []  # word_listに商品個数を追加
 		self.menu_dict = defaultdict(int)  # 商品個数計算用
 		self.place = "start_position"
 		self.activate_flag = False
-		self.yes_no_filename = "yes_no_sphinx"
 
 	# 処理の開始
 	def start_restaurant(self, data):
@@ -96,23 +89,6 @@ class RestGetOrder:
 		rospy.wait_for_service("/sound_system/speak")
 		rospy.ServiceProxy("/sound_system/speak", StringService)(sentence)
 
-	# 音声認識結果の取得
-	def get_txt(self, sentence):
-		if sentence != "":
-			self.txt = sentence.data
-			return
-		time.sleep(1)
-		self.start_resume.publish(True)
-
-	# yes/noの音声認識結果の取得
-	def get_yesno(self, sentence):
-		if not sentence == "":
-			self.take_answer = sentence.data
-			return
-		print('I\'m taking yes or no...')
-		time.sleep(1)
-		self.yes_no_pub.publish(True)
-
 	# navigation終了
 	def talk_order(self, data):
 		# type: (Bool) -> None
@@ -155,13 +131,13 @@ class RestGetOrder:
 
 			self.speak("Is it OK?")
 
-			self.take_answer = ""
-			self.get_yesno("")
-			while not self.take_answer == 'yes' and not self.take_answer == 'no':
-				continue
-			self.yes_no_pub.publish(False)
+			# yes_no認識
+			while True:
+				take_answer = self.resume_text("yes_no_sphinx")
+				if take_answer == "yes" or take_answer == "no":
+					break
 
-			if self.take_answer == 'yes':
+			if take_answer == 'yes':
 				# hot_word待機
 				self.hot_word()
 				self.speak("Please put order on the tray")
@@ -169,15 +145,17 @@ class RestGetOrder:
 				while True:
 					time.sleep(5)  # 商品が置かれるまで5秒待機
 					self.speak("Did you put order on the tray?")
-					self.get_yesno("")
-					while not self.take_answer == 'yes' and not self.take_answer == 'no':
-						continue
-					self.yes_no_pub.publish(False)
-					if self.take_answer == 'yes':
+
+					# yes_no認識
+					while True:
+						take_answer = self.resume_text("yes_no_sphinx")
+						if take_answer == "yes" or take_answer == "no":
+							break
+
+					if take_answer == 'yes':
 						# 次への通信を書いてください
 						# 制御へ場所情報を送信.
 						self.place = "table"
-						print "tableに移動するメッセージを投げる"
 						self.send_place_msg(self.place)
 						return
 					else:
@@ -192,26 +170,18 @@ class RestGetOrder:
 		"""
 		while True:
 			self.speak("May i take your order?")
-			self.txt = self.resume_text("rest_menu_sphinx")
-			"""
-			self.txt = ""
-			self.get_txt("")
-			while self.txt == "":  # txt取得まで待機
-				continue
-			"""
+			txt = self.resume_text("rest_menu_sphinx")
 
-			for menu in get_order.main(self.txt.decode('utf-8')):  # 注文されたメニューを取得
+			for menu in get_order.main(txt.decode('utf-8')):  # 注文されたメニューを取得
 				self.word_list.append(menu)
-
-			# self.take_answer = ""
 
 			self.speak("Anything else?")
 
+			# yes_no認識
 			while True:
 				take_answer = self.resume_text("yes_no_sphinx")
 				if take_answer == "yes" or take_answer == "no":
 					break
-
 			if take_answer == 'yes':  # 注文がまだ終わってなければ再度注文を聞く
 				continue
 
@@ -223,16 +193,16 @@ class RestGetOrder:
 				self.speak(word)
 			self.speak("Is it OK?")
 
-			self.take_answer = ''
-			self.get_yesno("")  # 聴きとった内容が正しいかを確認
-			while not self.take_answer == 'yes' and not self.take_answer == 'no':  # yesかnoを聞き取るまで待機
-				continue
+			# yes_no認識
+			while True:
+				take_answer = self.resume_text("yes_no_sphinx")
+				if take_answer == "yes" or take_answer == "no":
+					break
 
 			self.word_list = []  # 2週目以降に向けて初期化
 			self.menu_list = []
 			self.menu_dict = defaultdict(int)
-			self.yes_no_pub.publish(False)
-			if self.take_answer == 'yes':
+			if take_answer == 'yes':
 				self.speak("Sure")
 				# 制御へ場所情報を送信.
 				self.place = "kitchen"
