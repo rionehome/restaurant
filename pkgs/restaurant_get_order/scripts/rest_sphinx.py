@@ -73,7 +73,7 @@ class RestGetOrder:
 		self.change_gram_pub.publish(dict_name + ".gram")
 		rospy.wait_for_service("/sound_system/recognition")
 		response = rospy.ServiceProxy("/sound_system/recognition", StringService)()
-		return response
+		return response.text
 
 	@staticmethod
 	def hot_word():
