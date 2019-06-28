@@ -20,12 +20,10 @@ class RestGetOrder:
 		rospy.Subscriber("/restaurant/activate", Activate, self.start_restaurant)  # 起動用
 		rospy.Subscriber("yes_no/recognition_result", String, self.get_yesno)  # yes_no
 		rospy.Subscriber("restaurant_getO/recognition_result", String, self.get_txt)  # 音声認識結果
-		rospy.Subscriber("restaurant_nlp/finish_speaking", Bool, self.finish_speaking)  # 発話終了
 		rospy.Subscriber("/navigation/goal", Bool, self.talk_order)
 
 		self.id = activate_id
 		self.txt = ""  # 音声認識の文字列を格納
-		self.finish_speaking_flag = False
 		self.take_answer = ""
 		self.word_list = []  # 音声認識文からオーダを抽出
 		self.menu_list = []  # word_listに商品個数を追加
@@ -36,6 +34,11 @@ class RestGetOrder:
 	# 処理の開始
 	def start_restaurant(self, data):
 		# type: (Activate) -> None
+		"""
+		前のノードからの信号受付
+		:param data:
+		:return:
+		"""
 		if data.id == 1:
 			print "rest_get_order"
 			self.activate_flag = True
@@ -43,7 +46,11 @@ class RestGetOrder:
 
 	def send_place_msg(self, place):
 		# type: (str) -> None
-		# navigationに場所を伝える
+		"""
+		navigationに場所を伝える
+		:param place:
+		:return:
+		"""
 		rospy.wait_for_service("/sound_system/nlp", timeout=1)
 		response = rospy.ServiceProxy("/sound_system/nlp", NLPService)('Please go to {}'.format(place))
 		print response.response
@@ -55,6 +62,10 @@ class RestGetOrder:
 
 	@staticmethod
 	def hot_word():
+		"""
+		「hey, ducker」に反応
+		:return:
+		"""
 		rospy.wait_for_service("/hotword/detect", timeout=1)
 		print "hot_word待機"
 		rospy.ServiceProxy("/hotword/detect", HotwordService)()
@@ -62,12 +73,13 @@ class RestGetOrder:
 	@staticmethod
 	def speak(sentence):
 		# type: (str) -> None
+		"""
+		speak関数
+		:param sentence:
+		:return:
+		"""
 		rospy.wait_for_service("/sound_system/speak")
 		rospy.ServiceProxy("/sound_system/speak", StringService)(sentence)
-
-	def finish_speaking(self, data):
-		if data.data:
-			self.finish_speaking_flag = True
 
 	# 音声認識結果の取得
 	def get_txt(self, sentence):
@@ -102,8 +114,12 @@ class RestGetOrder:
 		if self.place == "kitchen":
 			self.kitchen()
 
-	# 各商品が幾つずつあるかを計算
 	def count_order(self, order_list):
+		"""
+		各商品が幾つずつあるかを計算
+		:param order_list:
+		:return:
+		"""
 		for i in [[key, 1] for key in order_list if key]:
 			key, value = i
 			self.menu_dict[key] += int(value)  # 各商品の個数をカウント
@@ -112,6 +128,10 @@ class RestGetOrder:
 		return self.menu_list
 
 	def kitchen(self):
+		"""
+		kitchenにいる時に実行する関数
+		:return:
+		"""
 		while True:
 			self.speak("Order of Table A is")
 			# オーダーを列挙していく
@@ -151,6 +171,10 @@ class RestGetOrder:
 				self.speak("I say order again")
 
 	def table(self):
+		"""
+		tableにいる時に実行する関数
+		:return:
+		"""
 		while True:
 			self.speak("May i take your order?")
 			self.txt = ""
