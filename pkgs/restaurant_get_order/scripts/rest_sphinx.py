@@ -7,6 +7,7 @@ from sound_system.srv import HotwordService, NLPService, StringService
 from rest_start_node.msg import Activate
 import get_order
 import time
+from collections import defaultdict
 
 
 class RestGetOrder:
@@ -24,10 +25,12 @@ class RestGetOrder:
 		rospy.Subscriber("/navigation/goal", Bool, self.talk_order)
 
 		self.id = activate_id
-		self.txt = ""
+		self.txt = ""    #音声認識の文字列を格納
 		self.finish_speaking_flag = False
 		self.take_answer = ""
-		self.word_list = []
+		self.word_list = []    #音声認識文からオーダを抽出 
+                self.menu_list = []    #word_listに商品個数を追加
+                self.menu_dict=defaultdict(int)    #商品個数計算用
 		self.place = "start_position"
 		self.speak_topic = "/sound_system/speak"
 		self.activate_flag = False
@@ -93,28 +96,45 @@ class RestGetOrder:
 
 		if self.place == "kitchen":
 			self.kitchen()
+                        
+        #各商品が幾つずつあるかを計算
+        def count_order(self, order_list):
+                for i in [[key, 1] for key in order_list if key]:
+                        key, value=i
+                        self.menu_dict[key] += int(value)    #各商品の個数をカウント
+                for i in self.menu_dict:
+                        self.menu_list.append('{}'.format(self.menu_dict[i])+i)    #発話用に商品名の頭に個数をプラス
+                return self.menu_list
+                
+
 
 	def kitchen(self):
 		while True:
-			self.start_speaking('Order of Table A is')
+                        rospy.wait_for_service("/sound_system/speak", timeout=1)
+                        response = rospy.ServiceProxy("/sound_system/speak", StringService)('Order of Table A is')
 			# オーダーを列挙していく
 			for i in self.word_list:
-				self.start_speaking('{}'.format(i))
-			self.start_speaking('Is it OK?')
-			self.take_answer = ""
+                                rospy.wait_for_service("/sound_system/speak", timeout=1)
+                                response = rospy.ServiceProxy("/sound_system/speak", StringService)(i)
+                                
+                        rospy.wait_for_service("/sound_system/speak", timeout=1)
+                        response = rospy.ServiceProxy("/sound_system/speak", StringService)('Is it OK?')
+                        self.take_answer = ""
 			self.get_yesno("")
 			while not self.take_answer == 'yes' and not self.take_answer == 'no':
 				continue
 			self.yes_no.publish(False)
+                        
 			if self.take_answer == 'yes':
 				rospy.wait_for_service("/hotword/detect", timeout=1)
 				print "hotword待機"
 				rospy.ServiceProxy("/hotword/detect", HotwordService)()
-
-				self.start_speaking('Please put order on the tray')
+                                rospy.wait_for_service("/sound_system/speak", timeout=1)
+                                response = rospy.ServiceProxy("/sound_system/speak", StringService)('Please put order on the tray')
 				while True:
 					time.sleep(5)  # 商品が置かれるまで5秒待機
-					self.start_speaking('Did you put order on the tray?')
+                                        rospy.wait_for_service("/sound_system/speak", timeout=1)
+                                        response = rospy.ServiceProxy("/sound_system/speak", StringService)('Did you put order on the tray?')
 					self.get_yesno("")
 					while not self.take_answer == 'yes' and not self.take_answer == 'no':
 						continue
@@ -129,30 +149,50 @@ class RestGetOrder:
 					else:
 						continue
 			else:
-				self.start_speaking('I say order again')
+                                rospy.wait_for_service("/sound_system/speak", timeout=1)
+                                response = rospy.ServiceProxy("/sound_system/speak", StringService)('I say order again')
+                                
 
 	def table(self):
-		self.start_speaking('May I take your order?')
 		while True:
+                        rospy.wait_for_service("/sound_system/speak", timeout=1)
+                        response = rospy.ServiceProxy("/sound_system/speak", StringService)('May i take your order?')
 			self.txt = ""
 			self.get_txt("")
 			while self.txt == "":  # txt取得まで待機
 				continue
 
 			self.take_answer = ""
-			self.word_list = get_order.main(self.txt.decode('utf-8'))
+                        for i in get_order.main(self.txt.decode('utf-8')):#注文されたメニューを取得
+                                self.word_list.append(i)
 
-			self.start_speaking('Let me confirm your order')
-
-			for i in self.word_list:
-				self.start_speaking('{}'.format(i))
-
-			self.start_speaking('Is it OK?')
-
+                        rospy.wait_for_service("/sound_system/speak", timeout=1)
+                        response = rospy.ServiceProxy("/sound_system/speak", StringService)('Anything else?')
+			self.get_yesno("")  # 聴きとった内容が正しいかを確認
+			while not self.take_answer == 'yes' and not self.take_answer == 'no':  # yesかnoを聞き取るまで待機
+				continue
+                        if self.take_answer == 'yes':    #注文がまだ終わってなければ再度注文を聞く
+                                continue
+                        
+                        self.word_list=self.count_order(self.word_list)    #商品の個数をカウント
+                        
+                        rospy.wait_for_service("/sound_system/speak", timeout=1)
+                        response = rospy.ServiceProxy("/sound_system/speak", StringService)('Let me confirm your order')
+                        
+			for i in self.word_list:#確認のために商品を復唱
+                                rospy.wait_for_service("/sound_system/speak", timeout=1)
+                                response = rospy.ServiceProxy("/sound_system/speak", StringService)(i)
+                                
+                        rospy.wait_for_service("/sound_system/speak", timeout=1)
+                        response = rospy.ServiceProxy("/sound_system/speak", StringService)('Is it OK?')
+                        self.take_answer=''
 			self.get_yesno("")  # 聴きとった内容が正しいかを確認
 			while not self.take_answer == 'yes' and not self.take_answer == 'no':  # yesかnoを聞き取るまで待機
 				continue
 
+                        self.word_list=[]#2週目以降に向けて初期化
+                        self.menu_list=[]
+                        self.menu_dict=defaultdict(int)
 			self.yes_no.publish(False)
 			if self.take_answer == 'yes':
 				self.start_speaking("Sure")
@@ -161,7 +201,9 @@ class RestGetOrder:
 				self.send_place_msg(self.place)
 				return
 			else:
-				self.start_speaking('Sorry, please say again your order')
+				#self.start_speaking('Sorry, please say again your order from the beginning')
+                                rospy.wait_for_service("/sound_system/speak", timeout=1)
+                                response = rospy.ServiceProxy("/sound_system/speak", StringService)('Sorry, please say again your order from the beginning')
 
 
 if __name__ == '__main__':
