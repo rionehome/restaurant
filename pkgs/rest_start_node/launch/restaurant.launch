@@ -13,6 +13,7 @@
 	<include file="$(find sound_system)/launch/navigation_nlp.launch"/>
 	<include file="$(find sound_system)/launch/hotword.launch"/>
 	<include file="$(find sound_system)/launch/speak.launch"/>
+	<include file="$(find sound_system)/launch/sphinx.launch"/>
 	<include file="$(find navigation)/launch/navigation.launch"/>
 	<node pkg="location" name="location" type="location_manager.py" output="screen">
   		<param name="info_file" value="biolink.txt"/>
