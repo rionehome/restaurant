@@ -1,0 +1,12 @@
+[finish_ref 9d87d7d] [fix]scr-
+ 10 files changed, 14 insertions(+), 15 deletions(-)
+ rename pkgs/rest_nlp_finish/{src => scripts}/beep/speech.wav (100%)
+ rename pkgs/rest_nlp_finish/{src => scripts}/beep/start.wav (100%)
+ rename pkgs/rest_nlp_finish/{src => scripts}/beep/stop.wav (100%)
+ rename pkgs/rest_nlp_finish/{src => scripts}/dictionary/rest_finish_sphinx.dict (100%)
+ rename pkgs/rest_nlp_finish/{src => scripts}/dictionary/rest_finish_sphinx.gram (100%)
+ rename pkgs/rest_nlp_finish/{src => scripts}/dictionary/yes_no_sphinx.dict (100%)
+ rename pkgs/rest_nlp_finish/{src => scripts}/dictionary/yes_no_sphinx.gram (100%)
+ rename pkgs/rest_nlp_finish/{src => scripts}/log/log2019-06-25 17:28:37.279703.txt (100%)
+ rename pkgs/rest_nlp_finish/{src => scripts}/log/log2019-06-26 20:26:22.021423.txt (100%)
+ rename pkgs/rest_nlp_finish/{src => scripts}/main.py (98%)

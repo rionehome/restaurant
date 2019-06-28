@@ -3,15 +3,32 @@
 # レストラン終了の音声認識、発話
 
 import rospy
-from std_msgs.msg import String, Bool
 from rest_start_node.msg import Activate
 import os
-import subprocess
 from pocketsphinx import LiveSpeech
 import datetime
+from sound_system.srv import StringService
 
 
-class Rest_Finish:
+class RestFinish:
+	def __init__(self, activate_id):
+		rospy.init_node("rest_nlp_finish")
+		rospy.Subscriber("/restaurant/activate", Activate, self.activation_callback)  # キッチンに戻ってきたらレストランをストップする音声認識開始
+
+		self.model_path = "/usr/local/lib/python2.7/dist-packages/pocketsphinx/model"  # 音響モデルのディレクトリの絶対パス
+		self.dictionary_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dictionary")  # 辞書のディレクトリの絶対パス
+		self.pub = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)  # Restaurant終了
+
+		self.log_file_name = "{}/log{}.txt".format(os.path.join(os.path.dirname(os.path.abspath(__file__)), "log"),
+												   datetime.datetime.now())
+
+		self.speak_topic = "/sound_system/speak"
+		self.id = activate_id
+		self.speech = None
+		self.speech_recognition = False
+		print('== STOP RECOGNITION ==')
+		self.main()
+
 	def command_resume(self):
 		print('== START RECOGNITION ==')
 		self.speech = LiveSpeech(
@@ -47,12 +64,15 @@ class Rest_Finish:
 			else:
 				print("**noise**")
 
-	# 発話
-	def speak(self, text):
-		beep_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'beep')
-		speech_wave = os.path.join(beep_path, 'speech.wav')
-		subprocess.call(['pico2wave', '-w={}'.format(speech_wave), text])
-		subprocess.call('aplay -q --quiet {}'.format(speech_wave), shell=True)
+	def speak(self, sentence):
+		# type: (str) -> None
+		"""
+		発話関数
+		:param sentence:
+		:return:
+		"""
+		rospy.wait_for_service(self.speak_topic)
+		rospy.ServiceProxy(self.speak_topic, StringService)(sentence)
 
 	# ログファイルの書き込みの関数
 	def log_file(self, sentence, judge):
@@ -64,18 +84,18 @@ class Rest_Finish:
 
 	# speech_recognitionがTrueになるまで待機するcallback関数
 	def judge(self):
-		while 1:
-			if self.speech_recognition == True:
+		while True:
+			if self.speech_recognition:
 				break
 
 	# キッチンに戻ってきた(音声認識開始の)メッセージを受け取る
-	def control(self, data):
-		if data.id == 3:
+	def activation_callback(self, data):
+		if data.id == self.id:
 			self.speech_recognition = True
 
 	def main(self):
 		self.judge()
-		while 1:
+		while True:
 			self.command_resume()  # 「wait」か「stop」を認識
 			text = self.recognition()
 			self.pause()  # 音声認識ストップ
@@ -93,9 +113,9 @@ class Rest_Finish:
 				rospy.loginfo("robot spoke: %s", speak_text)
 				self.speak(speak_text)  # 終了
 				self.log_file(speak_text, "s")
-				act = Activate()
-				act.id = 106
-				self.pub.publish(act)
+				activate = Activate()
+				activate.id = self.id + 1
+				self.pub.publish(activate)
 				break
 			else:
 				speak_text = "OK."
@@ -103,20 +123,7 @@ class Rest_Finish:
 				self.speak(speak_text)
 				self.log_file(speak_text, "s")
 
-	def __init__(self):
-		rospy.init_node('rest_nlp_finish_main', anonymous=True)
-		self.model_path = '/usr/local/lib/python2.7/dist-packages/pocketsphinx/model'  # 音響モデルのディレクトリの絶対パス
-		self.dictionary_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dictionary')  # 辞書のディレクトリの絶対パス
-		self.log_file_name = "{}/log{}.txt".format(os.path.join(os.path.dirname(os.path.abspath(__file__)), "log"),
-												   datetime.datetime.now())
-		self.pub = rospy.Publisher('/restaurant/activate', Activate, queue_size=10)  # Restaurant終了
-		rospy.Subscriber('/restaurant/activate', Activate, self.control)  # キッチンに戻ってきたらレストランをストップする音声認識開始
-		self.speech = None
-		self.speech_recognition = False
-		print('== STOP RECOGNITION ==')
-		self.main()
-		rospy.spin()
-
 
 if __name__ == '__main__':
-	Rest_Finish()
+	RestFinish(3)
+	rospy.spin()
