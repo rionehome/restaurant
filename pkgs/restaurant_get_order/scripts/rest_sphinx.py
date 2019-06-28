@@ -15,7 +15,6 @@ class RestGetOrder:
 		rospy.init_node("restaurant_get_order")
 		self.start_resume = rospy.Publisher("restaurant_getO/recognition_start", Bool, queue_size=10)
 		self.yes_no = rospy.Publisher("yes_no/recognition_start", Bool, queue_size=10)
-		# self.speak_pub = rospy.Publisher("/restaurant_nlp/speak", String, queue_size=10)  # 発話開始
 		self.activate_pub = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)
 
 		rospy.Subscriber("/restaurant/activate", Activate, self.start_restaurant)  # 起動用
@@ -116,8 +115,8 @@ class RestGetOrder:
 		while True:
 			self.speak("Order of Table A is")
 			# オーダーを列挙していく
-			for i in self.word_list:
-				self.speak(i)
+			for word in self.word_list:
+				self.speak(word)
 
 			self.speak("Is it OK?")
 
@@ -160,8 +159,8 @@ class RestGetOrder:
 				continue
 
 			self.take_answer = ""
-			for i in get_order.main(self.txt.decode('utf-8')):  # 注文されたメニューを取得
-				self.word_list.append(i)
+			for menu in get_order.main(self.txt.decode('utf-8')):  # 注文されたメニューを取得
+				self.word_list.append(menu)
 
 			self.speak("Anything else?")
 			self.get_yesno("")  # 聴きとった内容が正しいかを確認
@@ -174,8 +173,8 @@ class RestGetOrder:
 
 			self.speak("Let me confirm your order")
 
-			for i in self.word_list:  # 確認のために商品を復唱
-				self.speak(i)
+			for word in self.word_list:  # 確認のために商品を復唱
+				self.speak(word)
 			self.speak("Is it OK?")
 
 			self.take_answer = ''
