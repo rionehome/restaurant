@@ -168,7 +168,7 @@ class RestGetOrder:
 		tableにいる時に実行する関数
 		:return:
 		"""
-                self.word_list = []  # 2週目以降に向けて初期化
+		self.word_list = []  # 2週目以降に向けて初期化
 		self.menu_list = []
 		self.menu_dict = defaultdict(int)
 		while True:
@@ -202,9 +202,9 @@ class RestGetOrder:
 				if take_answer == "yes" or take_answer == "no":
 					break
 
-			#self.word_list = []  # 2週目以降に向けて初期化
-			#self.menu_list = []
-			#self.menu_dict = defaultdict(int)
+			# self.word_list = []  # 2週目以降に向けて初期化
+			# self.menu_list = []
+			# self.menu_dict = defaultdict(int)
 			if take_answer == 'yes':
 				self.speak("Sure")
 				# 制御へ場所情報を送信.
