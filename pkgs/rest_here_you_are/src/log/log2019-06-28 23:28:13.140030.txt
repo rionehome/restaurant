@@ -1,0 +1,4 @@
+2019-06-28 23:33:40.042367	robot spoke:Thank you for waiting. Here you are. Sorry, I have no arm. So, I want you to take items.
+2019-06-28 23:34:01.201929	robot spoke:Did you take items?
+2019-06-28 23:34:06.082656	robot heard:yes
+2019-06-28 23:34:07.663396	robot spoke:Thank you.
