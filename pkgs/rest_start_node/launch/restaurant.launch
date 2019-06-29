@@ -17,7 +17,7 @@
 	<include file="$(find sound_system)/launch/sphinx.launch"/>
 	<include file="$(find navigation)/launch/navigation.launch"/>
 	<node pkg="location" name="location" type="location_manager.py" output="screen">
-  		<param name="info_file" value="biolink.txt"/>
+  		<param name="info_file" value="crecore.txt"/>
   	</node>
 	<node pkg="move" name="MovementVelocityDesignation" output="screen" respawn="false" type="MovementVelocityDesignation"/>
 	<node pkg="move" name="MovementAmountDesignation" output="screen" respawn="false" type="MovementAmountDesignation"/>
