@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import rospy
+from sound_system.srv import NLPService
 from std_msgs.msg import String, Bool
 from rest_start_node.msg import Activate
 
@@ -27,9 +28,10 @@ class RestCallDucker:
         if msg.data:
             # マイク切り替え
             
-            # tableの場所を記録
-            #
-            ##
+            # locationに車の位置を記録
+            rospy.wait_for_service('/sound_system/nlp', timeout=1)
+            print rospy.ServiceProxy('/sound_system/nlp', NLPService)('Here is table')
+            
             self.activate_pub.publish(Activate(id=self.id + 1))
 
 
