@@ -1,8 +1,0 @@
-2019-06-25 17:28:50.111682	robot heard:stop the test
-2019-06-25 17:28:54.185471	robot spoke:May I stop the test? Please answer yes or no.
-2019-06-25 17:28:57.584152	robot heard:no
-2019-06-25 17:28:58.376379	robot spoke:OK.
-2019-06-25 17:29:04.121918	robot heard:stop the test
-2019-06-25 17:29:08.227155	robot spoke:May I stop the test? Please answer yes or no.
-2019-06-25 17:29:12.171937	robot heard:yes
-2019-06-25 17:29:13.976815	robot spoke:OK. I will stop.
