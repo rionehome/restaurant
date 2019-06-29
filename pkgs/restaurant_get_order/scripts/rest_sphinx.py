@@ -173,7 +173,10 @@ class RestGetOrder:
 		self.menu_dict = defaultdict(int)
 		while True:
 			self.speak("May i take your order?")
-			txt = self.resume_text("rest_menu_sphinx")
+			while True:
+				txt = self.resume_text("rest_menu_sphinx")
+				if len(txt) > 2:
+					break
 
 			for menu in get_order.main(txt.decode('utf-8')):  # 注文されたメニューを取得
 				self.word_list.append(menu)

@@ -61,7 +61,7 @@ class RestFinish:
 
 			while True:
 				text = self.resume_text("rest_finish_sphinx")
-				if text == "wait" or text == "stop":
+				if text == "wait" or text == "stop" or text == "stop the test":
 					break
 
 			self.speak("May I stop the test? Please answer yes or no.")
