@@ -12,6 +12,7 @@
 	<include file="$(find yes_no_recognition)/launch/yes_no_recognition.launch"/>
 
 	<include file="$(find sound_system)/launch/navigation_nlp.launch"/>
+	<include file="$(find sound_system)/launch/log.launch"/>
 	<include file="$(find sound_system)/launch/hotword.launch"/>
 	<include file="$(find sound_system)/launch/speak.launch"/>
 	<include file="$(find sound_system)/launch/sphinx.launch"/>
