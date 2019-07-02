@@ -35,7 +35,7 @@ class RestGetOrder:
         :param data:
         :return:
         """
-        if data.id == 1:
+        if data.id == self.id:
             print "rest_get_order"
             self.activate_flag = True
             self.table()
@@ -97,9 +97,7 @@ class RestGetOrder:
             return
         
         if self.place == "table":
-            activate = Activate()
-            activate.id = self.id + 1
-            self.activate_pub.publish(activate)
+            self.activate_pub.publish(Activate(id=self.id + 1))
             self.activate_flag = False
         
         if self.place == "kitchen":
@@ -129,7 +127,7 @@ class RestGetOrder:
             for word in self.word_list:
                 self.speak(word)
             
-            self.speak("Is it OK?")
+            self.speak("Is it OK?. Please answer yes or no.")
             
             # yes_no認識
             while True:
@@ -181,7 +179,7 @@ class RestGetOrder:
             for menu in get_order.main(txt.decode('utf-8')):  # 注文されたメニューを取得
                 self.word_list.append(menu)
             
-            self.speak("Anything else?")
+            self.speak("Anything else?. Please answer yes or no.")
             
             # yes_no認識
             while True:
@@ -197,7 +195,7 @@ class RestGetOrder:
             
             for word in self.word_list:  # 確認のために商品を復唱
                 self.speak(word)
-            self.speak("Is it OK?")
+            self.speak("Is it OK?. Please answer yes or no.")
             
             # yes_no認識
             while True:
@@ -205,9 +203,6 @@ class RestGetOrder:
                 if take_answer == "yes" or take_answer == "no":
                     break
             
-            # self.word_list = []  # 2週目以降に向けて初期化
-            # self.menu_list = []
-            # self.menu_dict = defaultdict(int)
             if take_answer == 'yes':
                 self.speak("Sure")
                 # 制御へ場所情報を送信.

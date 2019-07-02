@@ -68,6 +68,7 @@ class HereYouAre:
         if "OK" not in response.response:
             # 次のノードに処理を渡す
             self.activate_pub.publish(Activate(id=self.id + 1))
+            self.activate_flag = False
     
     def navigation_callback(self, data):
         if not self.activate_flag:
