@@ -51,10 +51,10 @@ class JudgeBar:
             direction = "right"
         else:
             direction = "left"
-        self.direction_pub.publish("left")
         print("direction: left")
         rospy.wait_for_service("/sound_system/speak", timeout=1)
         rospy.ServiceProxy("/sound_system/speak", StringService)("I am on the {} side".format(direction))
+        self.direction_pub.publish("left")
 
     def laser_sub(self, message):
         # type: (LaserScan) -> None
