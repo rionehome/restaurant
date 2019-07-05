@@ -39,8 +39,6 @@ class RestGetOrder:
         if data.id == self.id:
             print "rest_get_order"
             self.activate_flag = True
-            rospy.wait_for_service("/navigation/register_current_location", timeout=1)
-            rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("table")
             self.table()
     
     def send_place_msg(self, place):

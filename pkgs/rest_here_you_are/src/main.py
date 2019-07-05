@@ -73,10 +73,10 @@ class HereYouAre:
     def navigation_callback(self, data):
         if not self.activate_flag:
             return
-        
         print data
         time.sleep(1)
         self.activate_pub.publish(Activate(id=1))  # hey ducker待機（始めに戻る）
+        self.activate_flag = False
     
     # メッセージを受け取ったら、「Here you are」の発話
     def reach_customer(self, data):

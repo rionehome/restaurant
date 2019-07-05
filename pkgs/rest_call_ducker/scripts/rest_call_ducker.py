@@ -38,7 +38,7 @@ class RestCallDucker:
     def finish_callback(self, msg):
         # type:(Bool) -> None
         if msg.data:
-            # locationに車の位置を記録
+            # locationにtableの位置を記録
             rospy.wait_for_service("/navigation/register_current_location", timeout=1)
             rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("table")
             
