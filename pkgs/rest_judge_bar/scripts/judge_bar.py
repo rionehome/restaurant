@@ -52,7 +52,10 @@ class JudgeBar:
             if r != 0:
                 left += r
                 count += 1
-        left /= count
+        if count == 0:
+            left = 0.2
+        else:
+            left /= count
 
         count = 0
         for i in range(left_index - length, left_index + length):
@@ -60,7 +63,10 @@ class JudgeBar:
             if r != 0:
                 right += r
                 count += 1
-        right /= count
+        if count == 0:
+            right = 0.2
+        else:
+            right /= count
 
         self.speak("left is, {0:.2f} meters.".format(left))
         self.speak("right is, {0:.2f} meters.".format(right))
