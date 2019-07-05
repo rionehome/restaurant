@@ -89,6 +89,7 @@ class HereYouAre:
     def main(self):
         while True:
             self.speak("Did you take items?")
+            print "debug here you are"
             
             # yes_no認識
             while True:
