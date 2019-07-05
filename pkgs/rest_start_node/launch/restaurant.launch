@@ -6,6 +6,7 @@
 	<include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
 	<include file="$(find turtlebot_custom)/launch/gmapping_lidar.launch"/>
 	<include file="$(find turtlebot_custom)/launch/lidar.launch"/>
+    <include file="$(find turtlebot_custom)/launch/rviz.launch"/>
 	<include file="$(find tfpose_ros)/launch/kinect.launch"/>
 	<include file="$(find respeaker_ros)/launch/respeaker.launch"/>
 
