@@ -8,7 +8,6 @@ from rest_start_node.msg import Activate
 import get_order
 import time
 from collections import defaultdict
-from location.srv import RegisterLocation
 
 
 class RestGetOrder:
@@ -180,7 +179,7 @@ class RestGetOrder:
             
             for menu in get_order.main(txt.decode('utf-8')):  # 注文されたメニューを取得
                 self.word_list.append(menu)
-                
+            
             self.word_list = self.count_order(self.word_list)  # 商品の個数をカウント
             
             self.speak("Let me confirm your order.")
