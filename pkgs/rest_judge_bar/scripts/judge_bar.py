@@ -40,27 +40,27 @@ class JudgeBar:
         ranges = self.laser_data.ranges
         right_index = (len(ranges) // 4) * 3
         left_index = (len(ranges) // 4) * 1
-        right = 0
         left = 0
+        right = 0
         length = 10
         
         count = 0
         for i in range(right_index - length, right_index + length):
             r = ranges[i]
             if r != 0:
-                right += r
+                left += r
                 count += 1
-        right /= count
+        left /= count
         
         count = 0
         for i in range(left_index - length, left_index + length):
             r = ranges[i]
             if r != 0:
-                left += r
+                right += r
                 count += 1
-        left /= count
+        right /= count
         
-        if right < left:
+        if left < right:
             direction = "right"
         else:
             direction = "left"
