@@ -8,6 +8,7 @@ from rest_start_node.msg import Activate
 import get_order
 import time
 from collections import defaultdict
+from location.srv import RegisterLocation
 
 
 class RestGetOrder:
@@ -38,6 +39,8 @@ class RestGetOrder:
         if data.id == self.id:
             print "rest_get_order"
             self.activate_flag = True
+            rospy.wait_for_service("/navigation/register_current_location", timeout=1)
+            rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("table")
             self.table()
     
     def send_place_msg(self, place):
