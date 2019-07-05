@@ -6,6 +6,7 @@ from sensor_msgs.msg import LaserScan
 import math
 from std_msgs.msg import String
 from sound_system.srv import *
+from rest_start_node.msg import Activate
 
 
 class JudgeBar:
@@ -15,11 +16,19 @@ class JudgeBar:
 
         rospy.init_node("rest_judge_bar")
         self.laser_sub = rospy.Subscriber("/scan", LaserScan, self.laser_sub)
-        rospy.Service("/rest_judge_bar/detect", StringService, self.speak_callback)
-        print("起動")
+        self.activate_sub = rospy.Subscriber('/restaurant/activate', Activate, self.activate_callback)
+        self.activate_pub = rospy.Publisher('/restaurant/activate', Activate, queue_size=10)
 
-    def detect_callback(self, message):
-        # type: (StringServiceRequest) -> StringServiceResponse
+    def activate_callback(self, message):
+        # type: (Activate) -> None
+        if message.id == 0:
+            self.detect()
+
+            ac = Activate()
+            ac.id = 1
+            self.activate_pub.publish(ac)
+
+    def detect(self):
         while self.laser_data is None:
             pass
         ranges = self.laser_data.ranges
@@ -50,8 +59,20 @@ class JudgeBar:
             direction = "right"
         else:
             direction = "left"
-        print("direction: {}".format(direction))
-        return StringServiceResponse(direction)
+
+        self.speak("I am on the {} side".format(direction))
+        return
+
+    @staticmethod
+    def speak(sentence):
+        # type: (str) -> None
+        """
+        speak関数
+        :param sentence:
+        :return:
+        """
+        rospy.wait_for_service("/sound_system/speak")
+        rospy.ServiceProxy("/sound_system/speak", StringService)(sentence)
 
     def laser_sub(self, message):
         # type: (LaserScan) -> None
