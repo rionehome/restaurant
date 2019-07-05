@@ -76,7 +76,7 @@ class HereYouAre:
         
         print data
         time.sleep(1)
-        self.activate_pub.publish(Activate(id=1)) # hey ducker待機（始めに戻る）
+        self.activate_pub.publish(Activate(id=1))  # hey ducker待機（始めに戻る）
     
     # メッセージを受け取ったら、「Here you are」の発話
     def reach_customer(self, data):

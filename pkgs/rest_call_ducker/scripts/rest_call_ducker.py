@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+from location.srv import RegisterLocation
 import rospy
-from sound_system.srv import NLPService
+from sound_system.srv import StringService
 from std_msgs.msg import String, Bool
 from rest_start_node.msg import Activate
 
@@ -15,34 +15,32 @@ class RestCallDucker:
         self.call_ducker_pub = rospy.Publisher("/call_ducker/control", String, queue_size=10)
         self.activate_pub = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)
         self.id = activate_id
-
+    
     @staticmethod
     def speak(sentence):
-    # type: (str) -> None
-    """
-    speak関数
-    :param sentence:
-    :return:
-    """
-    rospy.wait_for_service("/sound_system/speak")
-    rospy.ServiceProxy("/sound_system/speak", StringService)(sentence)
-
+        # type: (str) -> None
+        """
+        speak関数
+        :param sentence:
+        :return:
+        """
+        rospy.wait_for_service("/sound_system/speak")
+        rospy.ServiceProxy("/sound_system/speak", StringService)(sentence)
+    
     def activate_callback(self, msg):
         # type: (Activate) -> None
         if msg.id == self.id:
             print "call_ducker"
-            self.speak("When ordering, please say ducker.") # 追加
+            self.speak("When ordering, please say ducker.")  # 追加
             # call_duckerにメッセージを送信
             self.call_ducker_pub.publish("start")
     
     def finish_callback(self, msg):
         # type:(Bool) -> None
         if msg.data:
-            # マイク切り替え
-            
             # locationに車の位置を記録
-            rospy.wait_for_service('/sound_system/nlp', timeout=1)
-            print rospy.ServiceProxy('/sound_system/nlp', NLPService)('Here is table')
+            rospy.wait_for_service("/navigation/register_current_location", timeout=1)
+            rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("table")
             
             self.activate_pub.publish(Activate(id=self.id + 1))
 
