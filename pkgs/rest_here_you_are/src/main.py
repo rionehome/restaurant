@@ -82,7 +82,7 @@ class HereYouAre:
     def reach_customer(self, data):
         if data.id == self.id:
             self.activate_flag = True
-            self.speak("Thank you for waiting. Here you are. Sorry, I have no arm. So, I want you to take items.")
+            self.speak("Thank you for waiting. Here you are. So, I want you to take items.")
             time.sleep(10)
             self.main()
     
