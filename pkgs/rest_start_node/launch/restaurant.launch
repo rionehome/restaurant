@@ -33,6 +33,5 @@
     <!-- <node pkg="rest_respond_human" name="rest_respond_human" output="screen" respawn="false" type="respond_human_main.py"/> -->
     <include file="$(find restaurant_get_order)/launch/rest_sphinx.launch"/>
     <include file="$(find rest_here_you_are)/launch/rest_here_you_are.launch"/>
-    <include file="$(find rest_nlp_finish)/launch/rest_nlp_finish.launch"/>
-
+    <!--     <include file="$(find rest_nlp_finish)/launch/rest_nlp_finish.launch"/> -->
 </launch>
