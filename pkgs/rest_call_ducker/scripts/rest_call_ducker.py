@@ -78,7 +78,7 @@ class RestCallDucker:
             # call_duckerにメッセージを送信
             self.call_ducker_pub.publish("start")
     
-    def navigation_goal_callback(self):
+    def navigation_goal_callback(self, msg):
         if self.activate_flag:
             self.speak("sorry, I can not find you. Please call me again.")
             self.pub_move_velocity(0, 0)
