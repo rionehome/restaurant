@@ -36,5 +36,5 @@ class RestCallDucker:
 
 
 if __name__ == '__main__':
-    RestCallDucker(0)
+    RestCallDucker(1)
     rospy.spin()
