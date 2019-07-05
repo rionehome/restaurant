@@ -20,6 +20,7 @@
 	<node pkg="location" name="location" type="location_manager.py" output="screen">
   		<param name="info_file" value="room.txt"/>
   	</node>
+  	<node pkg="rest_judge_bar" name="rest_judge_bar" type="judge_bar.py" output="screen"/>
 	<node pkg="move" name="MovementVelocityDesignation" output="screen" respawn="false" type="MovementVelocityDesignation"/>
 	<node pkg="move" name="MovementAmountDesignation" output="screen" respawn="false" type="MovementAmountDesignation"/>
     <node pkg="human_detection" name="human_detection" output="screen" respawn="false" type="human_detection_main"/>
