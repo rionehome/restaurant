@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+from location.srv import RegisterLocation
 import rospy
 from sensor_msgs.msg import LaserScan
 from sound_system.srv import *
@@ -31,6 +31,8 @@ class JudgeBar:
     def activate_callback(self, message):
         # type: (Activate) -> None
         if message.id == self.id:
+            rospy.wait_for_service("/navigation/register_current_location", timeout=1)
+            rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("kitchen")
             self.detect()
             self.activate_pub.publish(Activate(id=self.id + 1))
     

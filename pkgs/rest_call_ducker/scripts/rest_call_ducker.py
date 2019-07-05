@@ -37,12 +37,11 @@ class RestCallDucker:
     
     def finish_callback(self, msg):
         # type:(Bool) -> None
-        if msg.data:
-            # locationにtableの位置を記録
-            rospy.wait_for_service("/navigation/register_current_location", timeout=1)
-            rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("table")
-            
-            self.activate_pub.publish(Activate(id=self.id + 1))
+        # locationにtableの位置を記録
+        rospy.wait_for_service("/navigation/register_current_location", timeout=1)
+        rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("table")
+        
+        self.activate_pub.publish(Activate(id=self.id + 1))
 
 
 if __name__ == '__main__':
