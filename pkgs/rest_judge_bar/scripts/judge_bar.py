@@ -74,7 +74,7 @@ class JudgeBar:
             direction = "left"
             self.speak("My {} side is the nearest.".format("right"))
 
-        self.speak("I am on the {} side".format(direction))
+        self.speak("I am on the {} side in Bar".format(direction))
         return
 
     def laser_sub(self, message):
