@@ -10,7 +10,7 @@ from rest_start_node.msg import Activate
 class RestCallDucker:
     def __init__(self, activate_id):
         rospy.init_node("rest_call_ducker")
-        rospy.Subscriber("/navigation/goal", Bool, self.finish_callback)
+        rospy.Subscriber("/navigation_human_detect/goal", Bool, self.finish_callback)
         rospy.Subscriber("/restaurant/activate", Activate, self.activate_callback)
         self.call_ducker_pub = rospy.Publisher("/call_ducker/control", String, queue_size=10)
         self.activate_pub = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)
