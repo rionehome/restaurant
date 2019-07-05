@@ -138,6 +138,7 @@ class RestGetOrder:
             
             if take_answer == 'yes':
                 # hot_word待機
+                self.speak("when you finish cooking, Please call me, Hey Dukker.")
                 self.hot_word()
                 self.speak("Please put order on the tray")
                 
