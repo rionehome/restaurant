@@ -79,6 +79,8 @@ class RestCallDucker:
             self.call_ducker_pub.publish("start")
     
     def navigation_goal_callback(self, msg):
+        print "goal_callback"
+        print msg.data
         if self.activate_flag:
             self.speak("sorry, I can not find you. Please call me again.")
             self.pub_move_velocity(0, 0)
@@ -106,10 +108,7 @@ class RestCallDucker:
                 self.speak("Sorry.")
                 self.send_place_msg("kitchen")
         else:
-            self.speak("sorry, I can not find you. Please call me again.")
-            self.pub_move_velocity(0, 0)
-            self.call_ducker_pub.publish("start")
-            self.activate_flag = False
+            self.send_place_msg("kitchen")
 
 
 if __name__ == '__main__':
