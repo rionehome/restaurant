@@ -15,11 +15,23 @@ class RestCallDucker:
         self.call_ducker_pub = rospy.Publisher("/call_ducker/control", String, queue_size=10)
         self.activate_pub = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)
         self.id = activate_id
-    
+
+    @staticmethod
+    def speak(sentence):
+    # type: (str) -> None
+    """
+    speak関数
+    :param sentence:
+    :return:
+    """
+    rospy.wait_for_service("/sound_system/speak")
+    rospy.ServiceProxy("/sound_system/speak", StringService)(sentence)
+
     def activate_callback(self, msg):
         # type: (Activate) -> None
         if msg.id == self.id:
             print "call_ducker"
+            self.speak("When ordering, please say ducker.") # 追加
             # call_duckerにメッセージを送信
             self.call_ducker_pub.publish("start")
     

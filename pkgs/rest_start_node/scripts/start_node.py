@@ -7,24 +7,9 @@ from rest_start_node.msg import Activate
 from std_msgs.msg import Bool, String
 from location.srv import RegisterLocation
 
-
-@staticmethod
-def speak(sentence):
-    # type: (str) -> None
-    """
-    speak関数
-    :param sentence:
-    :return:
-    """
-    rospy.wait_for_service("/sound_system/speak")
-    rospy.ServiceProxy("/sound_system/speak", StringService)(sentence)
-
-
 if __name__ == '__main__':
     rospy.init_node("rest_start_node")
     pub = rospy.Publisher('/restaurant/activate', Activate, queue_size=10)
-    # ---ここらか追加---
-    # 客にHey Dackerを呼ばせるために、レストラン開始時に発話(いきなり発話しないように3秒待機へ変更)
 
     time.sleep(3)
 
@@ -34,7 +19,6 @@ if __name__ == '__main__':
 
     time.sleep(3)
 
-    speak('Please call me Hey Ducker')
 
     rospy.wait_for_service("/navigation/register_current_location", timeout=1)
     rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("kitchen")
