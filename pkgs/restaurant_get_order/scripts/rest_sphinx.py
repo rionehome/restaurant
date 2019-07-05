@@ -122,7 +122,7 @@ class RestGetOrder:
         :return:
         """
         while True:
-            self.speak("Order of Table A is")
+            self.speak("Order is")
             # オーダーを列挙していく
             for word in self.word_list:
                 self.speak(word)
@@ -178,17 +178,7 @@ class RestGetOrder:
             
             for menu in get_order.main(txt.decode('utf-8')):  # 注文されたメニューを取得
                 self.word_list.append(menu)
-            
-            self.speak("Anything else?. Please answer yes or no.")
-            
-            # yes_no認識
-            while True:
-                take_answer = self.resume_text("yes_no_sphinx")
-                if take_answer == "yes" or take_answer == "no":
-                    break
-            if take_answer == 'yes':  # 注文がまだ終わってなければ再度注文を聞く
-                continue
-            
+                
             self.word_list = self.count_order(self.word_list)  # 商品の個数をカウント
             
             self.speak("Let me confirm your order.")
@@ -214,5 +204,5 @@ class RestGetOrder:
 
 
 if __name__ == '__main__':
-    RestGetOrder(1)
+    RestGetOrder(2)
     rospy.spin()

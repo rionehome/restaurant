@@ -67,7 +67,7 @@ class HereYouAre:
         print response.response
         if "OK" not in response.response:
             # 次のノードに処理を渡す
-            self.activate_pub.publish(Activate(id=self.id + 1))
+            self.activate_pub.publish(Activate(id=1))
             self.activate_flag = False
     
     def navigation_callback(self, data):
@@ -75,7 +75,9 @@ class HereYouAre:
             return
         
         print data
-        self.activate_pub.publish(Activate(id=self.id + 1))  # 商品を渡し終えたメッセージを送信
+        time.sleep(1)
+        self.speak("Please call me Hey Ducker")
+        self.activate_pub.publish(Activate(id=1))  # 商品を渡し終えたメッセージを送信
     
     # メッセージを受け取ったら、「Here you are」の発話
     def reach_customer(self, data):
@@ -105,5 +107,5 @@ class HereYouAre:
 
 
 if __name__ == '__main__':
-    HereYouAre(2)
+    HereYouAre(3)
     rospy.spin()
