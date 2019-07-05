@@ -15,12 +15,11 @@ class JudgeBar:
 
         rospy.init_node("rest_judge_bar")
         self.laser_sub = rospy.Subscriber("/scan", LaserScan, self.laser_sub)
-        self.detct_sub = rospy.Subscriber("/rest_judge_bar/detect", String, self.detect_callback)
-        self.direction_pub = rospy.Publisher("/rest_judge_bar/direction", String, queue_size=10)
+        rospy.Service("/rest_judge_bar/detect", StringService, self.speak_callback)
         print("起動")
 
     def detect_callback(self, message):
-        # type: (String) -> None
+        # type: (StringServiceRequest) -> StringServiceResponse
         while self.laser_data is None:
             pass
         ranges = self.laser_data.ranges
@@ -51,10 +50,8 @@ class JudgeBar:
             direction = "right"
         else:
             direction = "left"
-        print("direction: left")
-        rospy.wait_for_service("/sound_system/speak", timeout=1)
-        rospy.ServiceProxy("/sound_system/speak", StringService)("I am on the {} side".format(direction))
-        self.direction_pub.publish("left")
+        print("direction: {}".format(direction))
+        return StringServiceResponse(direction)
 
     def laser_sub(self, message):
         # type: (LaserScan) -> None
