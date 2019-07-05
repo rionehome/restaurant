@@ -8,7 +8,7 @@ from rest_start_node.msg import Activate
 
 
 class JudgeBar:
-    
+
     def __init__(self, activate_id):
         rospy.init_node("rest_judge_bar")
         rospy.Subscriber("/scan", LaserScan, self.laser_sub)
@@ -16,7 +16,7 @@ class JudgeBar:
         self.activate_pub = rospy.Publisher('/restaurant/activate', Activate, queue_size=10)
         self.laser_data = None
         self.id = activate_id
-    
+
     @staticmethod
     def speak(sentence):
         # type: (str) -> None
@@ -27,7 +27,7 @@ class JudgeBar:
         """
         rospy.wait_for_service("/sound_system/speak")
         rospy.ServiceProxy("/sound_system/speak", StringService)(sentence)
-    
+
     def activate_callback(self, message):
         # type: (Activate) -> None
         if message.id == self.id:
@@ -35,7 +35,7 @@ class JudgeBar:
             rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("kitchen")
             self.detect()
             self.activate_pub.publish(Activate(id=self.id + 1))
-    
+
     def detect(self):
         while self.laser_data is None:
             pass
@@ -45,7 +45,7 @@ class JudgeBar:
         left = 0
         right = 0
         length = 10
-        
+
         count = 0
         for i in range(right_index - length, right_index + length):
             r = ranges[i]
@@ -53,7 +53,7 @@ class JudgeBar:
                 left += r
                 count += 1
         left /= count
-        
+
         count = 0
         for i in range(left_index - length, left_index + length):
             r = ranges[i]
@@ -61,18 +61,22 @@ class JudgeBar:
                 right += r
                 count += 1
         right /= count
-        
-        if left < right:
-            direction = "right"
-        else:
-            direction = "left"
 
         self.speak("left is, {0:.2f} meters.".format(left))
         self.speak("right is, {0:.2f} meters.".format(right))
-        self.speak("{} is the nearest.".format(direction))
+        print("left is, {0:.2f} meters.".format(left))
+        print("right is, {0:.2f} meters.".format(right))
+
+        if left < right:
+            direction = "right"
+            self.speak("My {} side is the nearest.".format("left"))
+        else:
+            direction = "left"
+            self.speak("My {} side is the nearest.".format("right"))
+
         self.speak("I am on the {} side".format(direction))
         return
-    
+
     def laser_sub(self, message):
         # type: (LaserScan) -> None
         self.laser_data = message
