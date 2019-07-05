@@ -31,7 +31,7 @@ class RestCallDucker:
         # type: (Activate) -> None
         if msg.id == self.id:
             print "call_ducker"
-            self.speak("When ordering, please say ducker.")  # 追加
+            self.speak("When ordering, please say, hey ducker.")  # 追加
             # call_duckerにメッセージを送信
             self.call_ducker_pub.publish("start")
     
