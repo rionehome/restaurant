@@ -171,7 +171,7 @@ class RestGetOrder:
         self.menu_list = []
         self.menu_dict = defaultdict(int)
         while True:
-            self.speak("May i take your order?")
+            self.speak("What is your order?")
             while True:
                 txt = self.resume_text("rest_menu_sphinx")
                 if len(txt) > 2:
