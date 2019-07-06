@@ -172,6 +172,8 @@ class RestGetOrder:
         self.word_list = []  # 2週目以降に向けて初期化
         self.menu_list = []
         self.menu_dict = defaultdict(int)
+        category_dict={'tea':'drinks', 'orange_juice':'drinks', 'pepsi':'drinks', 'instant_noodle':'food', 'baked_bean':'food', 'tuna':'food', 'nutella':'snacks', 'jelly':'snacks', 'pringles':'snacks'}
+
         while True:
             self.speak("What is your order?")
             while True:
@@ -181,7 +183,7 @@ class RestGetOrder:
             
             for menu in get_order.main(txt.decode('utf-8')):  # 注文されたメニューを取得
                 self.word_list.append(menu)
-            
+            category=category_dict[word_list[0]] #商品のカテゴリーを取得
             self.word_list = self.count_order(self.word_list)  # 商品の個数をカウント
             
             self.speak("Let me confirm your order.")
@@ -189,7 +191,7 @@ class RestGetOrder:
             for word in self.word_list:  # 確認のために商品を復唱
                 self.speak(word)
             rospy.sleep(1)
-            self.speak("Is {} OK?".format(self.word_list[0]))
+            self.speak("Is {}, category, {} ,OK?".format(self.word_list[0], category))
             self.speak("Please answer, yes or no.")
 
             # yes_no認識
