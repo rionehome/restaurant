@@ -18,7 +18,6 @@ class RestCallDucker:
         self.move_velocity_pub = rospy.Publisher("/move/velocity", Float64MultiArray, queue_size=10)
         self.call_ducker_pub = rospy.Publisher("/call_ducker/control", String, queue_size=10)
         self.activate_pub = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)
-        self.avoid_pub = rospy.Publisher('/avoid/activate', Bool, queue_size=10)
         self.id = activate_id
         self.activate_flag = False
     
@@ -75,7 +74,6 @@ class RestCallDucker:
         if msg.id == self.id:
             print "call_ducker"
             self.activate_flag = True
-            self.avoid_pub.publish(True)
             self.speak("When ordering, please say, hey ducker.")  # 追加
             # call_duckerにメッセージを送信
             self.call_ducker_pub.publish("start")
