@@ -125,12 +125,16 @@ class RestGetOrder:
         kitchenにいる時に実行する関数
         :return:
         """
-        while True:
-            self.speak("Order is")
-            # オーダーを列挙していく
-            for word in self.word_list:
-                self.speak(word)
-            
+        #while True:
+        self.speak("Order is")
+        # オーダーを列挙していく
+        for word in self.word_list:
+            self.speak(word)
+        self.speak("Please put order on the tray")
+        time.sleep(5)
+        self.place = "table"
+        self.send_place_msg(self.place)
+        """
             self.speak("Is it OK?. Please answer yes or no.")
             
             # yes_no認識
@@ -157,13 +161,13 @@ class RestGetOrder:
                     if take_answer == 'yes':
                         # 次への通信を書いてください
                         # 制御へ場所情報を送信.
-                        self.place = "table"
-                        self.send_place_msg(self.place)
+
                         return
                     else:
                         continue
             else:
                 self.speak("I say order again")
+        """
     
     def table(self):
         """
@@ -184,7 +188,7 @@ class RestGetOrder:
             for menu in get_order.main(txt.decode('utf-8')):  # 注文されたメニューを取得
                 self.word_list.append(menu)
             #self.word_list = self.count_order(self.word_list)  # 商品の個数をカウント
-            print(word_list)
+            #print(word_list)
             self.speak("Let me confirm your order.")
             rospy.sleep(1)
             for word in self.word_list:  # 確認のために商品を復唱
