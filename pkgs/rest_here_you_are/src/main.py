@@ -22,8 +22,6 @@ class HereYouAre:
         self.id = activate_id
         self.activate_flag = False
 
-        self.avoid_pub = rospy.Publisher('/avoid/activate', Bool, queue_size=10)
-
     def resume_text(self, dict_name):
         # type: (str)->str
         """
@@ -69,7 +67,6 @@ class HereYouAre:
         print response.response
         if "OK" not in response.response:
             # 次のノードに処理を渡す
-            self.avoid_pub.publish(True)
             self.activate_pub.publish(Activate(id=1))
             self.activate_flag = False
 
