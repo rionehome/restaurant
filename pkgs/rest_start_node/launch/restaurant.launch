@@ -33,4 +33,7 @@
     <include file="$(find restaurant_get_order)/launch/rest_sphinx.launch"/>
     <include file="$(find rest_here_you_are)/launch/rest_here_you_are.launch"/>
     <!--     <include file="$(find rest_nlp_finish)/launch/rest_nlp_finish.launch"/> -->
+
+    <node pkg="rest_additional_avoid" name="rest_additional_avoid" type="additional_avoid.py" output="screen">
+
 </launch>
