@@ -1,6 +1,5 @@
 <launch>
 
-	<node pkg="emergency_stop" name="emergency_stop" output="screen" respawn="false" type="main.py"/>
 	
 	<include file="$(find freenect_launch)/launch/freenect.launch"/>
 	<include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
