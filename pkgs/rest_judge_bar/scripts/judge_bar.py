@@ -78,10 +78,10 @@ class JudgeBar:
 
 		if left < right:
 			direction = "right"
-			self.speak("My {} side is the nearest.".format("left"))
+			#self.speak("My {} side is the nearest.".format("left"))
 		else:
 			direction = "left"
-			self.speak("My {} side is the nearest.".format("right"))
+			#self.speak("My {} side is the nearest.".format("right"))
 
 		self.speak("I am on the {} side in Bar".format(direction))
 		return
