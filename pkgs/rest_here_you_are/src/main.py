@@ -83,7 +83,7 @@ class HereYouAre:
         if data.id == self.id:
             self.activate_flag = True
             self.speak("Thank you for waiting. Here you are. So, I want you to take items.")
-            time.sleep(10)
+            time.sleep(5)
             self.main()
     
     def main(self):
