@@ -185,11 +185,13 @@ class RestGetOrder:
             self.word_list = self.count_order(self.word_list)  # 商品の個数をカウント
             
             self.speak("Let me confirm your order.")
-            
+            rospy.sleep(1)
             for word in self.word_list:  # 確認のために商品を復唱
                 self.speak(word)
-            self.speak("Is it OK?. Please answer yes or no.")
-            
+            rospy.sleep(1)
+            self.speak("Is {} OK?".format(self.word_list[0]))
+            self.speak("Please answer, yes or no.")
+
             # yes_no認識
             while True:
                 take_answer = self.resume_text("yes_no_sphinx")
