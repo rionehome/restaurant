@@ -105,19 +105,20 @@ class RestGetOrder:
         
         if self.place == "kitchen":
             self.kitchen()
-    
+    """
     def count_order(self, order_list):
-        """
+        
         各商品が幾つずつあるかを計算
         :param order_list:
         :return:
-        """
+        
         for i in [[key, 1] for key in order_list if key]:
             key, value = i
             self.menu_dict[key] += int(value)  # 各商品の個数をカウント
         for i in self.menu_dict:
             self.menu_list.append('{}'.format(self.menu_dict[i]) + i)  # 発話用に商品名の頭に個数をプラス
         return self.menu_list
+    """
     
     def kitchen(self):
         """
@@ -182,8 +183,8 @@ class RestGetOrder:
             
             for menu in get_order.main(txt.decode('utf-8')):  # 注文されたメニューを取得
                 self.word_list.append(menu)
-            self.word_list = self.count_order(self.word_list)  # 商品の個数をカウント
-            
+            #self.word_list = self.count_order(self.word_list)  # 商品の個数をカウント
+            print(word_list)
             self.speak("Let me confirm your order.")
             rospy.sleep(1)
             for word in self.word_list:  # 確認のために商品を復唱
