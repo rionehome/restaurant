@@ -202,7 +202,7 @@ class RestGetOrder:
             for word in self.word_list:  # 確認のために商品を復唱
                 self.speak(word)
             rospy.sleep(1)
-            self.speak("Is {} OK?".format(self.word_list[0]))
+            self.speak("Is {}, OK?".format(self.word_list[0]))
             self.speak("Please say, yes or no.")
 
             # yes_no認識
