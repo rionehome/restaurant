@@ -1,0 +1,10 @@
+<launch>
+
+  <node pkg="rest_additional_avoid" name="rest_judge_bar" type="additional_avoid.py" output="screen">
+  </node>
+
+
+  <node pkg="sound_system" name="speak" type="speak.py" output="screen">
+  </node>
+
+</launch>

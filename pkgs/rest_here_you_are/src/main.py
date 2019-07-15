@@ -10,18 +10,18 @@ import time
 
 
 class HereYouAre:
-    
+
     def __init__(self, activate_id):
         rospy.init_node("rest_here_you_are")
         rospy.Subscriber("/restaurant/activate", Activate, self.reach_customer)
         rospy.Subscriber("/navigation/goal", Bool, self.navigation_callback)
-        
+
         self.activate_pub = rospy.Publisher("/restaurant/activate", Activate, queue_size=10)  # キッチンに戻る
         self.change_dict_pub = rospy.Publisher("/sound_system/sphinx/dict", String, queue_size=10)
         self.change_gram_pub = rospy.Publisher("/sound_system/sphinx/gram", String, queue_size=10)
         self.id = activate_id
         self.activate_flag = False
-    
+
     def resume_text(self, dict_name):
         # type: (str)->str
         """
@@ -33,7 +33,7 @@ class HereYouAre:
         rospy.wait_for_service("/sound_system/recognition")
         response = rospy.ServiceProxy("/sound_system/recognition", StringService)()
         return response.response
-    
+
     @staticmethod
     def hot_word():
         """
@@ -43,7 +43,7 @@ class HereYouAre:
         rospy.wait_for_service("/hotword/detect", timeout=1)
         print "hot_word待機"
         rospy.ServiceProxy("/hotword/detect", HotwordService)()
-    
+
     @staticmethod
     def speak(sentence):
         # type: (str) -> None
@@ -54,7 +54,7 @@ class HereYouAre:
         """
         rospy.wait_for_service("/sound_system/speak")
         rospy.ServiceProxy("/sound_system/speak", StringService)(sentence)
-    
+
     def send_place_msg(self, place):
         # type: (str) -> None
         """
@@ -67,33 +67,36 @@ class HereYouAre:
         print response.response
         if "OK" not in response.response:
             # 次のノードに処理を渡す
-            self.activate_pub.publish(Activate(id=self.id + 1))
-    
+            self.activate_pub.publish(Activate(id=1))
+            self.activate_flag = False
+
     def navigation_callback(self, data):
         if not self.activate_flag:
             return
-        
         print data
-        self.activate_pub.publish(Activate(id=self.id + 1))  # 商品を渡し終えたメッセージを送信
-    
+        time.sleep(1)
+        self.activate_pub.publish(Activate(id=1))  # hey ducker待機（始めに戻る）
+        self.activate_flag = False
+
     # メッセージを受け取ったら、「Here you are」の発話
     def reach_customer(self, data):
         if data.id == self.id:
             self.activate_flag = True
-            self.speak("Thank you for waiting. Here you are. Sorry, I have no arm. So, I want you to take items.")
-            time.sleep(10)
+            self.speak("Thank you for waiting. Here you are. So, I want you to take items.")
+            time.sleep(5)
             self.main()
-    
+
     def main(self):
         while True:
             self.speak("Did you take items?")
-            
+            print "debug here you are"
+
             # yes_no認識
             while True:
                 text = self.resume_text("yes_no_sphinx")
                 if text == "yes" or text == "no":
                     break
-            
+
             if text == "yes":
                 self.speak("Thank you.")
                 self.send_place_msg("kitchen")
@@ -104,5 +107,5 @@ class HereYouAre:
 
 
 if __name__ == '__main__':
-    HereYouAre(2)
+    HereYouAre(3)
     rospy.spin()
