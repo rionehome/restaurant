@@ -9,14 +9,14 @@ import time
 
 class RestaurantFunctions:
     def __init__(self):
-        rospy.init_node("restaurant_rest_functions")
+        rospy.init_node("restaurant_main_functions")
 
         self.place = "start_position"  # 場所名
         self.order = ""  # オーダーの商品名
 
         self.call_ducker_pub = rospy.Publisher("/call_ducker/control", String, queue_size=10)
         self.move_velocity_pub = rospy.Publisher("/move/velocity", Float64MultiArray, queue_size=10)
-        self.function_name_pub = rospy.Publisher("/restaurant/function_argument_name", String, queue_size=10)
+        self.function_name_pub = rospy.Publisher("/restaurant/function_name", String, queue_size=10)
 
         rospy.Subscriber("/natural_language_processing/function_argument", String, self.function_argument_callback)
         rospy.Subscriber("/navigation/goal", Bool, self.navigation_goal_callback)
@@ -46,6 +46,8 @@ class RestaurantFunctions:
         3.call_duckerを開始
         :return: なし
         """
+        time.sleep(3)
+
         self.function_name_pub.publish("start")
 
     def call_ducker_finish_callback(self, msg):

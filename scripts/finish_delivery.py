@@ -21,7 +21,7 @@ class RestaurantFinishDelivery(AbstractModule):
     def finish_delivery(self):
         # type:() -> None
         """
-        商品の受け渡しが終了し、スタート位置（キッチン）に戻る
+        商品の受け渡しを終了し、スタート位置（キッチン）に戻る
         :return:なし
         """
         self.speak("Thank you.")

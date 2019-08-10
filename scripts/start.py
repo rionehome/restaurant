@@ -30,8 +30,6 @@ class RestaurantStart(AbstractModule):
         3.call_duckerを開始
         :return: なし
         """
-        time.sleep(3)
-
         rospy.wait_for_service("/rest_judge_bar/detect")
         direction = rospy.ServiceProxy("/rest_judge_bar/detect", StringService)()
         self.speak("I am on the {} side".format(direction))

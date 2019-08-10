@@ -20,7 +20,7 @@ class RestaurantCheckCustomer(AbstractModule):
     def check_customer(self):
         # type:() -> None
         """
-        呼んだお客さんなのかどうかを確認
+        呼んでいたお客さんなのかどうかを確認
         :return:なし
         """
         speak_sentence = "Are you ready to order?"
