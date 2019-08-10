@@ -47,7 +47,6 @@ class RestaurantFunctions:
         :return: なし
         """
         time.sleep(3)
-
         self.function_name_pub.publish("start")
 
     def call_ducker_finish_callback(self, msg):

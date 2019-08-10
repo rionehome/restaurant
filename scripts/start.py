@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 import rospy
 from std_msgs.msg import String
-import time
 from location.srv import RegisterLocation
 from sound_system.srv import StringService
+import time
 
 from abstract_module import AbstractModule
 

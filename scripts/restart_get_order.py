@@ -25,7 +25,7 @@ class RestaurantRestartGetOrder(AbstractModule):
         :param order: 商品名
         :return:なし
         """
-        self.speak("Sorry, please say again your order from the beginning")
+        self.speak("Sorry, please say again your order from the beginning.")
         speak_sentence = "What is your order?"
         self.speak(speak_sentence)
         self.nlp_pub.publish(speak_sentence)

@@ -8,7 +8,6 @@ from std_msgs.msg import String
 
 
 class AbstractModule(object):
-
     def __init__(self, node_name):
         # type: (str) -> None
 

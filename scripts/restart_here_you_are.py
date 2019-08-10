@@ -23,6 +23,7 @@ class RestaurantRestartHereYouAre(AbstractModule):
         少し待機してから、商品を取れたかどうかを、もう一度聞く
         :return:なし
         """
+        self.speak("OK.")
         time.sleep(5)
         speak_sentence = "Did you take items?"
         self.speak(speak_sentence)
