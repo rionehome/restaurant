@@ -3,25 +3,42 @@
 import math
 
 import rospy
-from cv_bridge import CvBridge, CvBridgeError
 from std_msgs.msg import String
+from nav_msgs.msg import Odometry
 from ros_posenet.msg import *
-from sensor_msgs.msg import Image
+
+MARGIN = 1
 
 
 class RaiseHand:
     def __init__(self):
-        self.bridge = CvBridge()
         self.cv_image = None
         self.point_list = ["nose", "leftEye", "rightEye", "leftEar", "rightEar", "leftShoulder", "rightShoulder"]
+        self.sensor_x = 0
+        self.sensor_y = 0
 
         rospy.init_node("raise_hand_human")
         rospy.Subscriber("/ros_posenet/result", Poses, self.pose_callback)
-        rospy.Subscriber("/posenet/input", Image, self.image_callback)
+        rospy.Subscriber("/odom", Odometry, self.odometry_callback)
         self.raise_hand_position_pub = rospy.Publisher('/restaurant/raise_hand_position', String, queue_size=10)
+
+    def odometry_callback(self, msg):
+        # type: (Odometry)->None
+        """
+        位置情報の受け取り
+        :param msg:
+        :return:
+        """
+        self.sensor_x = msg.pose.pose.position.x
+        self.sensor_y = msg.pose.pose.position.y
 
     def pose_callback(self, msgs):
         # type: (Poses)->None
+        """
+        関節推定の結果を受け取り
+        :param msgs:
+        :return:
+        """
         person_position = {}
         for pose in msgs.poses:
 
@@ -53,14 +70,12 @@ class RaiseHand:
         if len(person_position) == 0:
             return
         print min(person_position), person_position[min(person_position)]
-
-    def image_callback(self, msgs):
-        # type: (Image)->None
-        try:
-            self.cv_image = self.bridge.imgmsg_to_cv2(msgs, "bgr8")
-        except CvBridgeError as e:
-            rospy.logerr('Converting Image Error. ' + str(e))
+        if min(person_position) < MARGIN:
+            print "人間が近すぎます"
             return
+
+        safety_person_position = self.calc_safe_position(MARGIN, person_position[min(person_position)])
+        print safety_person_position
 
     @staticmethod
     def is_raise_hand(keypoints):
@@ -69,18 +84,35 @@ class RaiseHand:
         腕を上げているかの判定
         :return:
         """
-        __body_part_dict__ = {}
+        body_part_dict = {}
         for key in keypoints:
-            __body_part_dict__.setdefault(key.part, [key.position.x, key.position.y, key.position.z])
+            body_part_dict.setdefault(key.part, [key.position.x, key.position.y, key.position.z])
 
-        if "rightElbow" in __body_part_dict__ and "rightWrist" in __body_part_dict__:
-            if __body_part_dict__["rightElbow"][1] > __body_part_dict__["rightWrist"][1]:
+        if "rightElbow" in body_part_dict and "rightWrist" in body_part_dict:
+            if body_part_dict["rightElbow"][1] > body_part_dict["rightWrist"][1]:
                 return True
 
-        if "leftElbow" in __body_part_dict__ and "leftWrist" in __body_part_dict__:
-            if __body_part_dict__["leftElbow"][1] > __body_part_dict__["leftWrist"][1]:
+        if "leftElbow" in body_part_dict and "leftWrist" in body_part_dict:
+            if body_part_dict["leftElbow"][1] > body_part_dict["leftWrist"][1]:
                 return True
         return False
+
+    def calc_safe_position(self, margin, person_position):
+        # type: (float,list)->tuple
+        """
+        人間を中心にdistanceを半径とした円と、人間からロボットまで結んだ直線の交点を計算
+        :param margin:
+        :param person_position:
+        :return:
+        """
+        real_person_x = self.sensor_x + person_position[2]
+        real_person_y = self.sensor_y + person_position[0]
+        distance = math.sqrt((real_person_x - self.sensor_x) ** 2 + (real_person_y - self.sensor_y) ** 2)
+        # 三角形の相似を利用して算出
+        safety_person_x = (margin * (real_person_x - self.sensor_x)) / distance
+        safety_person_y = (margin * (real_person_y - self.sensor_y)) / distance
+
+        return safety_person_x, safety_person_y
 
 
 if __name__ == '__main__':
