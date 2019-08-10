@@ -5,7 +5,6 @@ from std_msgs.msg import String, Bool, Float64MultiArray
 from sound_system.srv import *
 from location.srv import RegisterLocation
 import time
-import os
 
 
 class RestaurantFunctions:
@@ -15,12 +14,11 @@ class RestaurantFunctions:
         self.place = "start_position"  # 場所名
         self.order = ""  # オーダーの商品名
 
-        self.nlp_pub = rospy.Publisher("/natural_language_processing/speak_sentence", String, queue_size=10)
         self.call_ducker_pub = rospy.Publisher("/call_ducker/control", String, queue_size=10)
         self.move_velocity_pub = rospy.Publisher("/move/velocity", Float64MultiArray, queue_size=10)
+        self.function_name_pub = rospy.Publisher("/restaurant/function_argument_name", String, queue_size=10)
 
         rospy.Subscriber("/natural_language_processing/function_argument", String, self.function_argument_callback)
-        rospy.Subscriber("/navigation_human_detect/goal", Bool, self.call_ducker_finish_callback)
         rospy.Subscriber("/navigation/goal", Bool, self.navigation_goal_callback)
 
         self.start()
@@ -48,20 +46,7 @@ class RestaurantFunctions:
         3.call_duckerを開始
         :return: なし
         """
-        time.sleep(3)
-
-        rospy.wait_for_service("/rest_judge_bar/detect")
-        direction = rospy.ServiceProxy("/rest_judge_bar/detect", StringService)()
-        self.speak("I am on the {} side".format(direction))
-
-        time.sleep(3)
-
-        rospy.wait_for_service("/navigation/register_current_location", timeout=1)
-        rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("kitchen")
-
-        self.speak("When ordering, please say, hey ducker.")
-        # call_duckerにメッセージを送信
-        self.call_ducker_pub.publish("start")
+        self.function_name_pub.publish("start")
 
     def call_ducker_finish_callback(self, msg):
         # type:(Bool) -> None
@@ -71,11 +56,9 @@ class RestaurantFunctions:
         :return: なし
         """
         if msg.data:
-            speak_sentence = "Are you ready to order?"
-            self.speak(speak_sentence)
-            self.nlp_pub.publish(speak_sentence)
+            self.function_name_pub.publish("check_customer")
         else:
-            self.send_place_msg("kitchen")
+            self.function_name_pub.publish("restart_call_ducker")
 
     def restart_call_ducker(self):
         # type:() -> None
@@ -84,8 +67,7 @@ class RestaurantFunctions:
         お客さんを間違っていたので、call_ducerのやり直し
         :return:なし
         """
-        self.speak("Sorry.")
-        self.send_place_msg("kitchen")
+        self.function_name_pub.publish("restart_call_ducker")
 
     def get_order(self):
         # type:() -> None
@@ -94,13 +76,7 @@ class RestaurantFunctions:
         お客さんが合っていたので、テーブルでオーダーを聞く
         :return:なし
         """
-        self.speak("OK.")
-        # locationにtableの位置を記録
-        rospy.wait_for_service("/navigation/register_current_location", timeout=1)
-        rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("table")
-        speak_sentence = "What is your order?"
-        self.speak(speak_sentence)
-        self.nlp_pub.publish(speak_sentence)
+        self.function_name_pub.publish("get_order")
 
     def restart_get_order(self, order):
         # type:(str) -> None
@@ -110,24 +86,18 @@ class RestaurantFunctions:
         :param order: 商品名
         :return:なし
         """
-        self.speak("Sorry, please say again your order from the beginning")
-        speak_sentence = "What is your order?"
-        self.speak(speak_sentence)
-        self.nlp_pub.publish(speak_sentence)
+        self.function_name_pub.publish("restart_get_order")
 
     def finish_get_order(self, order):
         # type:(str) -> None
         """
         natural_language_processingのメッセージによって実行される関数
         オーダーを記憶して、キッチンに移動する
-        :param order: 商品名
         :return:なし
         """
         self.order = order
-        self.speak("Sure")
-        # 制御へ場所情報を送信
         self.place = "kitchen"
-        self.send_place_msg(self.place)
+        self.function_name_pub.publish("finish_get_order")
 
     def kitchen(self):
         # type:() -> None
@@ -135,11 +105,11 @@ class RestaurantFunctions:
         キッチンでオーダーを復唱
         :return:なし
         """
-        self.speak("Order is {}.").format(self.order)
+        self.speak("Order is {}.".format(self.order))
         self.speak("Please put order on the tray.")
         time.sleep(5)
         self.place = "table"
-        self.send_place_msg(self.place)
+        self.send_place_msg("table")
 
     def here_you_are(self):
         # type:() -> None
@@ -147,11 +117,7 @@ class RestaurantFunctions:
         テーブルで商品を渡す
         :return:なし
         """
-        self.speak("Thank you for waiting. Here you are. So, I want you to take items.")
-        time.sleep(5)
-        speak_sentence = "Did you take items?"
-        self.speak(speak_sentence)
-        self.nlp_pub.publish(speak_sentence)
+        self.function_name_pub.publish("here_you_are")
 
     def restart_here_you_are(self):
         # type:() -> None
@@ -160,10 +126,7 @@ class RestaurantFunctions:
         少し待機してから、商品を取れたかどうかを、もう一度聞く
         :return:なし
         """
-        time.sleep(5)
-        speak_sentence = "Did you take items?"
-        self.speak(speak_sentence)
-        self.nlp_pub.publish(speak_sentence)
+        self.function_name_pub.publish("restart_here_you_are")
 
     def finish_delivery(self):
         # type:() -> None
@@ -172,9 +135,8 @@ class RestaurantFunctions:
         商品の受け渡しが終了し、スタート位置（キッチン）に戻る
         :return:なし
         """
-        self.speak("Thank you.")
-        self.place = "start position"
-        self.send_place_msg("kitchen")
+        self.place = "return start position"
+        self.function_name_pub.publish("finish_delivery")
 
     def navigation_goal_callback(self, msg):
         # type:(Bool) -> None
@@ -188,6 +150,11 @@ class RestaurantFunctions:
             self.kitchen()
         elif self.place == "table":
             self.here_you_are()
+        elif self.place == "return start position":
+            self.speak("When ordering, please say, hey ducker.")
+            self.pub_move_velocity(0, 0)
+            self.place = "start position"
+            self.call_ducker_pub.publish("start")
 
     def pub_move_velocity(self, straight, turn):
         """
