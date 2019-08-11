@@ -1,5 +1,5 @@
-# !/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# coding: UTF-8
 import math
 
 import rospy
@@ -39,6 +39,7 @@ class RaiseHand:
         :param msgs:
         :return:
         """
+        print "dbeug"
         person_position = {}
         for pose in msgs.poses:
 
