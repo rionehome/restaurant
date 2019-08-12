@@ -162,26 +162,32 @@ class CallDucker:
         for key in key_points:
             body_part_dict.setdefault(key.part, [key.position.x, key.position.y, key.position.z])
         
-        if "rightShoulder" in body_part_dict and "rightElbow" in body_part_dict:
-            if body_part_dict["rightShoulder"][1] > body_part_dict["rightElbow"][1]:
-                return True
+        if "rightShoulder" in body_part_dict:
+            if "rightElbow" in body_part_dict:
+                if body_part_dict["rightShoulder"][1] > body_part_dict["rightElbow"][1]:
+                    return True
+            if "rightWrist" in body_part_dict:
+                if body_part_dict["rightShoulder"][1] > body_part_dict["rightWrist"][1]:
+                    return True
         
-        if "leftShoulder" in body_part_dict and "leftElbow" in body_part_dict:
-            if body_part_dict["leftShoulder"][1] > body_part_dict["leftElbow"][1]:
-                return True
+        if "leftShoulder" in body_part_dict:
+            if "leftElbow" in body_part_dict:
+                if body_part_dict["leftShoulder"][1] > body_part_dict["leftElbow"][1]:
+                    return True
+            if "leftWrist" in body_part_dict:
+                if body_part_dict["leftShoulder"][1] > body_part_dict["leftWrist"][1]:
+                    return True
+        
         return False
     
     def calc_real_position(self, point):
         # type:(tuple)->tuple
         relative_theta = self.sensor_rad
         relative_x = point[2]
-        relative_y = point[0]
+        relative_y = -point[0]
         
-        delta_theta = math.atan(relative_y / relative_x)
-        # x = relative_x * math.cos(relative_theta) - relative_y * math.sin(relative_theta)
-        # y = relative_x * math.sin(relative_theta) + relative_y * math.cos(relative_theta)
-        x = math.sqrt(relative_x ** 2 + relative_y ** 2) * math.cos(relative_theta + delta_theta)
-        y = math.sqrt(relative_x ** 2 + relative_y ** 2) * math.sin(relative_theta + delta_theta)
+        x = relative_x * math.cos(relative_theta) - relative_y * math.sin(relative_theta)
+        y = relative_x * math.sin(relative_theta) + relative_y * math.cos(relative_theta)
         print "real", x, y
         return x, y
     
