@@ -31,8 +31,7 @@ class RestaurantStart(AbstractModule):
         time.sleep(3)
 
         rospy.wait_for_service("/rest_judge_bar/detect", timeout=1)
-        direction = rospy.ServiceProxy("/rest_judge_bar/detect", StringService)()
-        self.speak("I am on the {} side".format(direction))
+        rospy.ServiceProxy("/rest_judge_bar/detect", StringService)()
 
         time.sleep(3)
 

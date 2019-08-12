@@ -1,0 +1,6 @@
+<launch>
+
+  <node pkg="restaurant" name="rest_judge_bar" type="judge_bar.py" output="screen">
+  </node>
+
+</launch>
