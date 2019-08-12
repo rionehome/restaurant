@@ -16,9 +16,11 @@ class RestaurantRestartCallDucker(AbstractModule):
         # type:(String) -> None
         """
         natural_language_processingからのメッセージによって実行される
-        「Hey Ducker」の失敗　or お客さんを間違っていたので call_ducerのやり直し
-        :return:なし
+        お客さんを間違っていたので call_ducerのやり直し
+        :param data: ""
+        :return: なし
         """
+        self.print_node("restart_call_ducker")
         self.speak("Sorry.")
         self.send_place_msg("kitchen")
 

@@ -20,9 +20,10 @@ class RestaurantFinishDelivery(AbstractModule):
         """
         natural_language_processingからのメッセージによって実行される
         商品の受け渡しを終了し、スタート位置（キッチン）に戻る
-        :param: なし
+        :param data: ""
         :return: なし
         """
+        self.print_node("finish_delivery")
         self.speak("Thank you.")
         self.send_place_msg("kitchen")
 

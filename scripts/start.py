@@ -23,7 +23,7 @@ class RestaurantStart(AbstractModule):
         1.テーブルの左右のジャッジ
         2.「"Hey Ducker"と呼んでください」と発話
         3.call_duckerを開始
-        :param: data: なし
+        :param data: ""
         :return: なし
         """
         self.print_node("start")

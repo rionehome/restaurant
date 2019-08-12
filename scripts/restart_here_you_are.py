@@ -18,9 +18,10 @@ class RestaurantRestartHereYouAre(AbstractModule):
         """
         natural_language_processingからのメッセージによって実行される
         少し待機してから、商品を取れたかどうかを、もう一度聞く
-        :param: なし
+        :param data: ""
         :return: なし
         """
+        self.print_node("restart_here_you_are")
         self.speak("OK.")
         time.sleep(5)
         speak_sentence = "Did you take items?"

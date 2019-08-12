@@ -18,7 +18,8 @@ class RestaurantGetOrder(AbstractModule):
         """
         natural_language_processingからのメッセージによって実行される
         お客さんを見つけることができたので、テーブルでオーダーを聞く
-        :return:なし
+        :param: data: ""
+        :return: なし
         """
         self.print_node("get_order")
         self.speak("OK.")

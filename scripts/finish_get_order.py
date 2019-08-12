@@ -19,7 +19,7 @@ class RestaurantFinishGetOrder(AbstractModule):
         natural_language_processingのメッセージによって実行される関数
         オーダーを記憶して、キッチンに移動する
         :param data: 商品名
-        :return:なし
+        :return: なし
         """
         self.print_node("finish_get_order")
         self.speak("Sure")

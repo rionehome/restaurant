@@ -18,7 +18,7 @@ class RestaurantRestartGetOrder(AbstractModule):
         natural_language_processingからのメッセージによって実行される関数
         もう一度始めからオーダーを言い直してほしいと言う
         :param data: 誤っている商品名
-        :return:なし
+        :return: なし
         """
         self.print_node("restart_get_order")
         self.speak("Sorry, please say again your order from the beginning.")

@@ -20,8 +20,10 @@ class RestaurantCheckCustomer(AbstractModule):
         """
         1.call_ducekrの成功/失敗を判定
         2.成功ならお客さんの確認、失敗ならcall_duckerをやり直す
+        :param msg: Bool
         :return: なし
         """
+        self.print_node("check_customer")
         if msg.data:
             self.print_node("check_customer")
             speak_sentence = "Are you ready to order?"
@@ -32,7 +34,7 @@ class RestaurantCheckCustomer(AbstractModule):
             self.speak("Sorry.")
             self.send_place_msg("kitchen")
 
-            self.speak("sorry, I can not find you. Please call me again.")
+            self.speak("Sorry, I can not find you. Please call me again.")
             self.pub_move_velocity(0, 0)
             self.call_ducker_pub.publish("start")
 
