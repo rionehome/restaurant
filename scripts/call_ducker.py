@@ -7,7 +7,7 @@ from move_base_msgs.msg import MoveBaseGoal, MoveBaseAction
 import rospy
 import actionlib
 from sound_system.srv import HotwordService, StringService
-from std_msgs.msg import String, Int32, Empty
+from std_msgs.msg import String, Int32
 from nav_msgs.msg import Odometry
 from ros_posenet.msg import *
 from geometry_msgs.msg import Point, Quaternion
@@ -38,7 +38,6 @@ class CallDucker:
         self.move_base_client = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
         self.amount_client = actionlib.SimpleActionClient("/move/amount", AmountAction)
         self.raise_hand_position_pub = rospy.Publisher('/restaurant/raise_hand_position', String, queue_size=1)
-        self.reset_odom_pub = rospy.Publisher('/mobile_base/commands/reset_odometry', Empty, queue_size=10)
     
     @staticmethod
     def to_angle(rad):
@@ -174,11 +173,15 @@ class CallDucker:
     
     def calc_real_position(self, point):
         # type:(tuple)->tuple
-        # relative_theta = self.sensor_rad
-        # relative_x = point[2]
-        # relative_y = point[0]
-        x = self.sensor_x + point[2]
-        y = self.sensor_y - point[0]
+        relative_theta = self.sensor_rad
+        relative_x = point[2]
+        relative_y = point[0]
+        
+        delta_theta = math.atan(relative_y / relative_x)
+        # x = relative_x * math.cos(relative_theta) - relative_y * math.sin(relative_theta)
+        # y = relative_x * math.sin(relative_theta) + relative_y * math.cos(relative_theta)
+        x = math.sqrt(relative_x ** 2 + relative_y ** 2) * math.cos(relative_theta + delta_theta)
+        y = math.sqrt(relative_x ** 2 + relative_y ** 2) * math.sin(relative_theta + delta_theta)
         print "real", x, y
         return x, y
     
@@ -223,8 +226,6 @@ class CallDucker:
             # 音源定位
             self.hot_word()
             self.turn_sound_source()
-            # オドメトリ初期化
-            self.reset_odom_pub.publish(Empty())
             self.speak("Please raise your hand.")
             self.flag = False
     
