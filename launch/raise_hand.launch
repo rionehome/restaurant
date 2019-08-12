@@ -5,9 +5,6 @@
     <include file="$(find turtlebot_custom)/launch/rviz.launch"/>
     <!-- 	<include file="$(find respeaker_ros)/launch/respeaker.launch"/> -->
     <node pkg="restaurant" name="raise_hand" type="raise_hand.py" output="screen"/>
-    <node pkg="mapping" name="mapping_load" type="load.py" output="screen">
-        <param name="info_file" value="mapping"/>
-    </node>
 
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
     <arg name="topic"               default="camera/image_raw" />
