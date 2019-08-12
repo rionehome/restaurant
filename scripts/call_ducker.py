@@ -145,8 +145,11 @@ class CallDucker:
             sum_y += person[1]
         ave_x = sum_x / len(persons)
         ave_y = sum_y / len(persons)
-        print ave_x, ave_y
-        return ave_x, ave_y
+        
+        result = self.calc_safe_position(MARGIN, (ave_x, ave_y))
+        
+        print result
+        return result[0], result[1]
     
     @staticmethod
     def is_raise_hand(key_points):
@@ -175,7 +178,7 @@ class CallDucker:
         relative_y = point[0]
         x = relative_x * math.cos(relative_theta) - relative_y * math.sin(relative_theta)
         y = relative_x * math.sin(relative_theta) + relative_y * math.cos(relative_theta)
-        print x, y
+        print "real", x, y
         return x, y
     
     def calc_safe_position(self, margin, person_position):
@@ -186,14 +189,13 @@ class CallDucker:
         :param person_position:
         :return:
         """
-        result = self.calc_real_position(person_position)
-        real_person_x = result[0]
-        real_person_y = result[1]
+        real_person_x = person_position[0]
+        real_person_y = person_position[1]
         """
         distance = math.sqrt((real_person_x - self.sensor_x) ** 2 + (real_person_y - self.sensor_y) ** 2)
         # 三角形の相似を利用して算出
-        safety_person_x = -(margin * (self.sensor_x - real_person_x)) / distance
-        safety_person_y = -(margin * (self.sensor_y - real_person_y)) / distance
+        safety_person_x = real_person_x - (margin * abs(real_person_x - self.sensor_x)) / distance
+        safety_person_y = real_person_y - (margin * (real_person_y - self.sensor_y)) / distance
         """
         safety_person_x = real_person_x - margin
         safety_person_y = real_person_y
@@ -263,14 +265,12 @@ class CallDucker:
             del self.raise_hand_persons[:]
             return
         
-        safety_person_position = self.calc_safe_position(MARGIN, person_position[min(person_position)])
         if len(self.raise_hand_persons) < 10:
-            self.raise_hand_persons.append(safety_person_position)
+            self.raise_hand_persons.append(self.calc_real_position(person_position[min(person_position)][1]))
             print "発見"
             self.se.play(self.se.DISCOVERY)
         else:
             result = self.calc_raise_person_position(self.raise_hand_persons)
-            
             status = self.send_move_base((result[0], result[1], 0))
             if status == actionlib.GoalStatus.SUCCEEDED:
                 print "到着"
