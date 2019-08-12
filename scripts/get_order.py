@@ -11,23 +11,20 @@ class RestaurantGetOrder(AbstractModule):
     def __init__(self):
         super(RestaurantGetOrder, self).__init__(node_name="restaurant_get_order")
 
-        rospy.Subscriber("/restaurant/function_name", String, self.function_name_callback)
+        rospy.Subscriber("/natural_language_processing/get_order", String, self.get_order_callback)
 
-    def function_name_callback(self, data):
-        if data.data == "get_order":
-            self.print_node(data.data)
-            self.get_order()
-
-    def get_order(self):
-        # type:() -> None
+    def get_order_callback(self, data):
+        # type:(String) -> None
         """
+        natural_language_processingからのメッセージによって実行される
         お客さんを見つけることができたので、テーブルでオーダーを聞く
         :return:なし
         """
+        self.print_node("get_order")
         self.speak("OK.")
         # locationにtableの位置を記録
-        rospy.wait_for_service("/navigation/register_current_location", timeout=1)
-        rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("table")
+        rospy.wait_for_service("/location/register_current_location", timeout=1)
+        rospy.ServiceProxy("/location/register_current_location", RegisterLocation)("table")
         speak_sentence = "What is your order?"
         self.speak(speak_sentence)
         self.nlp_pub.publish(speak_sentence)

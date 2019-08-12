@@ -11,17 +11,15 @@ class RestaurantRestartHereYouAre(AbstractModule):
     def __init__(self):
         super(RestaurantRestartHereYouAre, self).__init__(node_name="restaurant_restart_here_you_are")
 
-        rospy.Subscriber("/restaurant/function_name", String, self.function_name_callback)
+        rospy.Subscriber("/natural_language_processing/restart_here_you_are", String, self.restart_here_you_are_callback)
 
-    def function_name_callback(self, data):
-        if data.data == "restart_here_you_are":
-            self.restart_here_you_are()
-
-    def restart_here_you_are(self):
-        # type:() -> None
+    def restart_here_you_are_callback(self, data):
+        # type:(String) -> None
         """
+        natural_language_processingからのメッセージによって実行される
         少し待機してから、商品を取れたかどうかを、もう一度聞く
-        :return:なし
+        :param: なし
+        :return: なし
         """
         self.speak("OK.")
         time.sleep(5)

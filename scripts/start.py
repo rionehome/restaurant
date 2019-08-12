@@ -15,29 +15,29 @@ class RestaurantStart(AbstractModule):
 
         self.call_ducker_pub = rospy.Publisher("/call_ducker/control", String, queue_size=10)
 
-        rospy.Subscriber("/restaurant/function_name", String, self.function_name_callback)
+        rospy.Subscriber("/natural_language_processing/start", String, self.start_callback)
 
-    def function_name_callback(self, data):
-        if data.data == "start":
-            self.print_node(data.data)
-            self.start()
-
-    def start(self):
-        # type: () -> None
+    def start_callback(self, data):
+        # type: (String) -> None
         """
         1.テーブルの左右のジャッジ
         2.「"Hey Ducker"と呼んでください」と発話
         3.call_duckerを開始
+        :param: data: なし
         :return: なし
         """
-        rospy.wait_for_service("/rest_judge_bar/detect")
+        self.print_node("start")
+
+        time.sleep(3)
+
+        rospy.wait_for_service("/rest_judge_bar/detect", timeout=1)
         direction = rospy.ServiceProxy("/rest_judge_bar/detect", StringService)()
         self.speak("I am on the {} side".format(direction))
 
         time.sleep(3)
 
-        rospy.wait_for_service("/navigation/register_current_location", timeout=1)
-        rospy.ServiceProxy("/navigation/register_current_location", RegisterLocation)("kitchen")
+        rospy.wait_for_service("/location/register_current_location", timeout=1)
+        rospy.ServiceProxy("/location/register_current_location", RegisterLocation)("kitchen")
 
         self.speak("When ordering, please say, hey ducker.")
         # call_duckerにメッセージを送信

@@ -10,21 +10,17 @@ class RestaurantRestartGetOrder(AbstractModule):
     def __init__(self):
         super(RestaurantRestartGetOrder, self).__init__(node_name="restaurant_restart_get_order")
 
-        rospy.Subscriber("/restaurant/function_name", String, self.function_name_callback)
+        rospy.Subscriber("/natural_language_processing/restart_get_order", String, self.restart_get_order_callback)
 
-    def function_name_callback(self, data):
-        if data.data == "restart_get_order":
-            self.print_node(data.data)
-            self.restart_get_order()
-
-    def restart_get_order(self):
-        # type:() -> None
+    def restart_get_order_callback(self, data):
+        # type:(String) -> None
         """
         natural_language_processingからのメッセージによって実行される関数
         もう一度始めからオーダーを言い直してほしいと言う
-        :param order: 商品名
+        :param data: 誤っている商品名
         :return:なし
         """
+        self.print_node("restart_get_order")
         self.speak("Sorry, please say again your order from the beginning.")
         speak_sentence = "What is your order?"
         self.speak(speak_sentence)

@@ -4,9 +4,7 @@
   <node name="restaurant_finish_delivery" pkg="restaurant" type="finish_delivery.py" output="screen" />
   <node name="restaurant_finish_get_order" pkg="restaurant" type="finish_get_order.py" output="screen" />
   <node name="restaurant_get_order" pkg="restaurant" type="get_order.py" output="screen" />
-  <node name="restaurant_here_you_are" pkg="restaurant" type="here_you_are.py" output="screen" />
   <node name="restaurant_restart_call_ducker" pkg="restaurant" type="restart_call_ducker.py" output="screen" />
   <node name="restaurant_restart_get_order" pkg="restaurant" type="restart_get_order.py" output="screen" />
   <node name="restaurant_restart_here_you_are" pkg="restaurant" type="restart_here_you_are.py" output="screen" />
-  <node name="restaurant_main_functions" pkg="restaurant" type="main_functions.py" output="screen" />
 </launch>

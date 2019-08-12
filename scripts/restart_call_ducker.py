@@ -10,16 +10,12 @@ class RestaurantRestartCallDucker(AbstractModule):
     def __init__(self):
         super(RestaurantRestartCallDucker, self).__init__(node_name="restaurant_restart_call_ducker")
 
-        rospy.Subscriber("/restaurant/function_name", String, self.function_name_callback)
+        rospy.Subscriber("/natural_language_processing/restart_call_ducker", String, self.restart_call_ducker_callback)
 
-    def function_name_callback(self, data):
-        if data.data == "restart_call_ducker":
-            self.print_node(data.data)
-            self.restart_call_ducker()
-
-    def restart_call_ducker(self):
-        # type:() -> None
+    def restart_call_ducker_callback(self, data):
+        # type:(String) -> None
         """
+        natural_language_processingからのメッセージによって実行される
         「Hey Ducker」の失敗　or お客さんを間違っていたので call_ducerのやり直し
         :return:なし
         """

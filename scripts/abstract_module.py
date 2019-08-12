@@ -3,7 +3,7 @@
 
 import rospy
 from sound_system.srv import *
-
+from location.srv import RequestLocation
 from std_msgs.msg import String
 
 
@@ -22,8 +22,8 @@ class AbstractModule(object):
         :param place: 場所
         :return:
         """
-        rospy.wait_for_service("/sound_system/nlp", timeout=1)
-        response = rospy.ServiceProxy("/sound_system/nlp", NLPService)('Please go to {}'.format(place))
+        rospy.wait_for_service("/location/request_location", timeout=1)
+        response = rospy.ServiceProxy("/location/request_location", RequestLocation)(place)
         print response.response
 
     @staticmethod
