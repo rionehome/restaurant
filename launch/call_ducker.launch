@@ -6,6 +6,9 @@
     <include file="$(find respeaker_ros)/launch/respeaker.launch"/>
     <node pkg="restaurant" name="call_ducker" type="call_ducker.py" output="screen"/>
 
+    <node pkg="sound_system" name="speak" type="speak.py" output="screen"/>
+    <node pkg="sound_system" name="hotword" type="hotword_detector.py" output="screen"/>
+
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
     <arg name="topic"               default="camera/image_raw" />
     <arg name="gpu"                 default="false" />
