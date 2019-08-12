@@ -31,7 +31,7 @@ class CallDucker:
         
         rospy.init_node("raise_hand_human")
         rospy.Subscriber("/ros_posenet/result", Poses, self.pose_callback, queue_size=1)
-        rospy.Subscriber("/call_ducker/control", String, self.control_callback(), queue_size=1)
+        rospy.Subscriber("/call_ducker/control", String, self.control_callback, queue_size=1)
         rospy.Subscriber("/odom", Odometry, self.odometry_callback)
         rospy.Subscriber("/sound_direction", Int32, self.respeaker_callback)
         self.client = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
