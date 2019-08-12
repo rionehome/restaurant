@@ -23,6 +23,7 @@ class CallDucker:
         self.point_list = ["nose", "leftEye", "rightEye", "leftEar", "rightEar", "leftShoulder", "rightShoulder"]
         self.sensor_x = 0
         self.sensor_y = 0
+        self.sensor_rad = 0
         self.flag = True
         self.marker = RvizMarker()
         self.raise_hand_persons = []
@@ -37,6 +38,18 @@ class CallDucker:
         self.move_base_client = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
         self.amount_client = actionlib.SimpleActionClient("/move/amount", AmountAction)
         self.raise_hand_position_pub = rospy.Publisher('/restaurant/raise_hand_position', String, queue_size=1)
+    
+    @staticmethod
+    def to_angle(rad):
+        return rad * 180 / math.pi
+    
+    @staticmethod
+    def to_radian(angle):
+        return (angle * math.pi) / 180
+    
+    @staticmethod
+    def to_quaternion_ang(w, z):
+        return math.acos(w) * 2 * z
     
     def send_move_base(self, point):
         # type:(tuple)->int
@@ -115,7 +128,7 @@ class CallDucker:
             ave_y = sum_y / count
             ave_z = sum_z / count
             distance = math.sqrt(ave_x ** 2 + ave_y ** 2 + ave_z ** 2)
-            return distance, [ave_x, ave_y, ave_z]
+            return distance, (ave_x, ave_y, ave_z)
         except ZeroDivisionError:
             print "countが0 @raise_hand"
         return None
@@ -140,16 +153,23 @@ class CallDucker:
                 return True
         return False
     
+    def calc_real_position(self, point):
+        # type:(tuple)->tuple
+        x = point[0] * math.cos(self.sensor_rad) - point[1] * math.sin(self.sensor_rad)
+        y = point[0] * math.sin(self.sensor_rad) + point[1] * math.cos(self.sensor_rad)
+        return x, y
+    
     def calc_safe_position(self, margin, person_position):
-        # type: (float,list)->tuple
+        # type: (float,tuple)->tuple
         """
         人間を中心にdistanceを半径とした円と、人間からロボットまで結んだ直線の交点を計算
         :param margin:
         :param person_position:
         :return:
         """
-        real_person_x = self.sensor_x + person_position[2]
-        real_person_y = self.sensor_y - person_position[0]
+        result = self.calc_real_position(person_position)
+        real_person_x = result[0]
+        real_person_y = result[1]
         """
         distance = math.sqrt((real_person_x - self.sensor_x) ** 2 + (real_person_y - self.sensor_y) ** 2)
         # 三角形の相似を利用して算出
@@ -192,6 +212,7 @@ class CallDucker:
         """
         self.sensor_x = msg.pose.pose.position.x
         self.sensor_y = msg.pose.pose.position.y
+        self.sensor_rad = self.to_quaternion_ang(msg.pose.pose.orientation.w, msg.pose.pose.orientation.z)
     
     def pose_callback(self, msgs):
         # type: (Poses)->None
