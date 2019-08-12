@@ -7,7 +7,7 @@ from move_base_msgs.msg import MoveBaseGoal, MoveBaseAction
 import rospy
 import actionlib
 from sound_system.srv import HotwordService, StringService
-from std_msgs.msg import String, Int32
+from std_msgs.msg import String, Int32, Empty
 from nav_msgs.msg import Odometry
 from ros_posenet.msg import *
 from geometry_msgs.msg import Point, Quaternion
@@ -38,6 +38,7 @@ class CallDucker:
         self.move_base_client = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
         self.amount_client = actionlib.SimpleActionClient("/move/amount", AmountAction)
         self.raise_hand_position_pub = rospy.Publisher('/restaurant/raise_hand_position', String, queue_size=1)
+        self.reset_odom_pub = rospy.Publisher('/mobile_base/commands/reset_odometry', Empty, queue_size=10)
     
     @staticmethod
     def to_angle(rad):
@@ -173,15 +174,16 @@ class CallDucker:
     
     def calc_real_position(self, point):
         # type:(tuple)->tuple
-        relative_theta = self.sensor_rad
-        relative_x = point[2]
-        relative_y = point[0]
-        x = relative_x * math.cos(relative_theta) - relative_y * math.sin(relative_theta)
-        y = relative_x * math.sin(relative_theta) + relative_y * math.cos(relative_theta)
+        # relative_theta = self.sensor_rad
+        # relative_x = point[2]
+        # relative_y = point[0]
+        x = self.sensor_x + point[2]
+        y = self.sensor_y - point[0]
         print "real", x, y
         return x, y
     
-    def calc_safe_position(self, margin, person_position):
+    @staticmethod
+    def calc_safe_position(margin, person_position):
         # type: (float,tuple)->tuple
         """
         人間を中心にdistanceを半径とした円と、人間からロボットまで結んだ直線の交点を計算
@@ -221,6 +223,8 @@ class CallDucker:
             # 音源定位
             self.hot_word()
             self.turn_sound_source()
+            # オドメトリ初期化
+            self.reset_odom_pub.publish(Empty())
             self.speak("Please raise your hand.")
             self.flag = False
     
@@ -266,7 +270,7 @@ class CallDucker:
             return
         
         if len(self.raise_hand_persons) < 10:
-            self.raise_hand_persons.append(self.calc_real_position(person_position[min(person_position)][1]))
+            self.raise_hand_persons.append(self.calc_real_position(person_position[min(person_position)]))
             print "発見"
             self.se.play(self.se.DISCOVERY)
         else:
