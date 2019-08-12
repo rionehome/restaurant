@@ -152,6 +152,7 @@ class RaiseHand:
         safety_person_position = self.calc_safe_position(MARGIN, person_position[min(person_position)])
         if len(self.raise_hand_persons) < 10:
             self.raise_hand_persons.append(safety_person_position)
+            print "発見"
             self.se.play(self.se.DISCOVERY)
         else:
             status = self.send_move_base((self.raise_hand_persons[5][0], self.raise_hand_persons[5][1], 0))
