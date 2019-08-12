@@ -4,7 +4,7 @@
 	<include file="$(find turtlebot_custom)/launch/lidar.launch"/>
     <include file="$(find turtlebot_custom)/launch/rviz.launch"/>
     <!-- 	<include file="$(find respeaker_ros)/launch/respeaker.launch"/> -->
-    <node pkg="restaurant" name="raise_hand" type="raise_hand.py" output="screen"/>
+    <node pkg="restaurant" name="call_ducker" type="call_ducker.py" output="screen"/>
 
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
     <arg name="topic"               default="camera/image_raw" />

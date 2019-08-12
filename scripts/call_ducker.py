@@ -2,10 +2,12 @@
 # coding: UTF-8
 import math
 
+from move.msg import AmountGoal
 from move_base_msgs.msg import MoveBaseGoal, MoveBaseAction
 import rospy
 import actionlib
-from std_msgs.msg import String
+from sound_system.srv import HotwordService, StringService
+from std_msgs.msg import String, Int32
 from nav_msgs.msg import Odometry
 from ros_posenet.msg import *
 from geometry_msgs.msg import Point, Quaternion
@@ -15,20 +17,23 @@ from module.se import SE
 MARGIN = 0.8
 
 
-class RaiseHand:
+class CallDucker:
     def __init__(self):
         self.cv_image = None
         self.point_list = ["nose", "leftEye", "rightEye", "leftEar", "rightEar", "leftShoulder", "rightShoulder"]
         self.sensor_x = 0
         self.sensor_y = 0
-        self.flag = False
+        self.flag = True
         self.marker = RvizMarker()
         self.raise_hand_persons = []
+        self.sound_source_angle_list = []
         self.se = SE()
         
         rospy.init_node("raise_hand_human")
         rospy.Subscriber("/ros_posenet/result", Poses, self.pose_callback, queue_size=1)
+        rospy.Subscriber("/call_ducker/control", String, self.pose_callback, queue_size=1)
         rospy.Subscriber("/odom", Odometry, self.odometry_callback)
+        rospy.Subscriber("/sound_direction", Int32, self.respeaker_callback)
         self.client = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
         self.raise_hand_position_pub = rospy.Publisher('/restaurant/raise_hand_position', String, queue_size=1)
     
@@ -45,6 +50,52 @@ class RaiseHand:
         self.client.send_goal(goal)
         self.client.wait_for_result()
         return self.client.get_state()
+    
+    @staticmethod
+    def speak(sentence):
+        # type: (str) -> None
+        """
+        発話関数
+        :param sentence:
+        :return:
+        """
+        rospy.wait_for_service("/sound_system/speak")
+        rospy.ServiceProxy("/sound_system/speak", StringService)(sentence)
+    
+    @staticmethod
+    def hot_word():
+        """
+        「hey, ducker」に反応
+        :return:
+        """
+        rospy.wait_for_service("/sound_system/hotword", timeout=1)
+        print "hot_word待機"
+        rospy.ServiceProxy("/sound_system/hotword", HotwordService)()
+    
+    def move_turn(self, angle):
+        """
+        角度送信
+        :param angle:
+        :return:
+        """
+        goal = AmountGoal()
+        goal.amount.angle = angle
+        goal.velocity.angular_rate = 0.5
+        
+        self.client.wait_for_server()
+        self.client.send_goal(goal)
+        self.client.wait_for_result(rospy.Duration(10))
+    
+    def turn_sound_source(self):
+        """
+        音源定位した後の移動
+        :return:
+        """
+        # 回転メッセージを投げる
+        angle = self.sound_source_angle_list[3]  # 時間を遡る
+        if angle - 180 > 0:
+            angle = -(360 - angle)
+        self.move_turn(angle)
     
     def calc_average_position(self, pose):
         try:
@@ -69,14 +120,14 @@ class RaiseHand:
         return None
     
     @staticmethod
-    def is_raise_hand(keypoints):
+    def is_raise_hand(key_points):
         # type: (dict)->bool
         """
         腕を上げているかの判定
         :return:
         """
         body_part_dict = {}
-        for key in keypoints:
+        for key in key_points:
             body_part_dict.setdefault(key.part, [key.position.x, key.position.y, key.position.z])
         
         if "rightShoulder" in body_part_dict and "rightElbow" in body_part_dict:
@@ -109,6 +160,28 @@ class RaiseHand:
         
         return safety_person_x, safety_person_y
     
+    ################################################################################
+    def respeaker_callback(self, msg):
+        # type:(Int32)->None
+        """
+        angle_listにスタック
+        :param msg:
+        :return:
+        """
+        angle = msg.data
+        if len(self.sound_source_angle_list) > 10:
+            self.sound_source_angle_list.pop(0)
+        self.sound_source_angle_list.append(angle)
+    
+    def control_callback(self, msg):
+        # type:(String)->None
+        if msg.data == "start":
+            # 音源定位
+            self.hot_word()
+            self.turn_sound_source()
+            self.speak("Please raise your hand.")
+            self.flag = True
+    
     def odometry_callback(self, msg):
         # type: (Odometry)->None
         """
@@ -136,7 +209,7 @@ class RaiseHand:
                 continue
             
             result = self.calc_average_position(pose)
-            if result == None:
+            if result is None:
                 continue
             person_position.setdefault(result[0], result[1])
         
@@ -165,5 +238,5 @@ class RaiseHand:
 
 
 if __name__ == '__main__':
-    RaiseHand()
+    CallDucker()
     rospy.spin()
