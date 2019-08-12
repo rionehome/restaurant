@@ -181,7 +181,7 @@ class CallDucker:
             self.hot_word()
             self.turn_sound_source()
             self.speak("Please raise your hand.")
-            self.flag = True
+            self.flag = False
     
     def odometry_callback(self, msg):
         # type: (Odometry)->None
