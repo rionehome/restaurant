@@ -111,7 +111,7 @@ class CallDucker:
             angle = -(360 - angle)
         self.move_turn(angle)
     
-    def calc_average_position(self, pose):
+    def calc_person_position(self, pose):
         try:
             # 人間の三次元座標を計算
             count = 0
@@ -132,6 +132,21 @@ class CallDucker:
         except ZeroDivisionError:
             print "countが0 @raise_hand"
         return None
+    
+    def calc_raise_person_position(self, persons):
+        """
+        手を上げている人の3D場所を計算
+        :return:
+        """
+        sum_x = 0
+        sum_y = 0
+        for person in persons:
+            sum_x += person[0]
+            sum_y += person[1]
+        ave_x = sum_x / len(persons)
+        ave_y = sum_y / len(persons)
+        print ave_x, ave_y
+        return ave_x, ave_y
     
     @staticmethod
     def is_raise_hand(key_points):
@@ -155,8 +170,12 @@ class CallDucker:
     
     def calc_real_position(self, point):
         # type:(tuple)->tuple
-        x = point[0] * math.cos(self.sensor_rad) - point[1] * math.sin(self.sensor_rad)
-        y = point[0] * math.sin(self.sensor_rad) + point[1] * math.cos(self.sensor_rad)
+        relative_theta = self.sensor_rad
+        relative_x = point[2]
+        relative_y = point[0]
+        x = relative_x * math.cos(relative_theta) - relative_y * math.sin(relative_theta)
+        y = relative_x * math.sin(relative_theta) + relative_y * math.cos(relative_theta)
+        print x, y
         return x, y
     
     def calc_safe_position(self, margin, person_position):
@@ -230,7 +249,7 @@ class CallDucker:
             if not self.is_raise_hand(pose.keypoints):
                 continue
             
-            result = self.calc_average_position(pose)
+            result = self.calc_person_position(pose)
             if result is None:
                 continue
             person_position.setdefault(result[0], result[1])
@@ -250,7 +269,9 @@ class CallDucker:
             print "発見"
             self.se.play(self.se.DISCOVERY)
         else:
-            status = self.send_move_base((self.raise_hand_persons[5][0], self.raise_hand_persons[5][1], 0))
+            result = self.calc_raise_person_position(self.raise_hand_persons)
+            
+            status = self.send_move_base((result[0], result[1], 0))
             if status == actionlib.GoalStatus.SUCCEEDED:
                 print "到着"
                 self.flag = True
