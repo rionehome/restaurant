@@ -2,7 +2,7 @@
 # coding: UTF-8
 import math
 
-from move.msg import AmountGoal
+from move.msg import AmountGoal, AmountAction
 from move_base_msgs.msg import MoveBaseGoal, MoveBaseAction
 import rospy
 import actionlib
@@ -34,7 +34,8 @@ class CallDucker:
         rospy.Subscriber("/call_ducker/control", String, self.control_callback, queue_size=1)
         rospy.Subscriber("/odom", Odometry, self.odometry_callback)
         rospy.Subscriber("/sound_direction", Int32, self.respeaker_callback)
-        self.client = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
+        self.move_base_client = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
+        self.amount_client = actionlib.SimpleActionClient("/move/amount", AmountAction)
         self.raise_hand_position_pub = rospy.Publisher('/restaurant/raise_hand_position', String, queue_size=1)
     
     def send_move_base(self, point):
@@ -45,11 +46,11 @@ class CallDucker:
         goal.target_pose.pose.position = Point(point[0], point[1], point[2])
         goal.target_pose.pose.orientation = Quaternion(0, 0, 0, 1)
         self.marker.register(goal.target_pose.pose)
-        self.client.wait_for_server()
+        self.move_base_client.wait_for_server()
         print "move_baseに送信"
-        self.client.send_goal(goal)
-        self.client.wait_for_result()
-        return self.client.get_state()
+        self.move_base_client.send_goal(goal)
+        self.move_base_client.wait_for_result()
+        return self.move_base_client.get_state()
     
     @staticmethod
     def speak(sentence):
@@ -82,9 +83,9 @@ class CallDucker:
         goal.amount.angle = angle
         goal.velocity.angular_rate = 0.5
         
-        self.client.wait_for_server()
-        self.client.send_goal(goal)
-        self.client.wait_for_result(rospy.Duration(10))
+        self.amount_client.wait_for_server()
+        self.amount_client.send_goal(goal)
+        self.amount_client.wait_for_result(rospy.Duration(10))
     
     def turn_sound_source(self):
         """
