@@ -5,7 +5,7 @@ import subprocess
 class SE:
     def __init__(self):
         self.se_path = "{}/etc/SE/".format(rospkg.RosPack().get_path('restaurant'))
-        self.DISCOVERY = self.se_path + "discovery.mp3"
+        self.DISCOVERY = self.se_path + "discovery.wav"
     
     @staticmethod
     def play(se):
