@@ -8,6 +8,11 @@
 
     <node pkg="sound_system" name="speak" type="speak.py" output="screen"/>
     <node pkg="sound_system" name="hotword" type="hotword_detector.py" output="screen"/>
+    
+    <group ns="move">
+        <node pkg="move" name="velocity" respawn="false" type="velocity"/>
+	    <node pkg="move" name="amount" respawn="false" type="amount"/>
+    </group>
 
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
     <arg name="topic"               default="camera/image_raw" />
