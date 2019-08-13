@@ -1,3 +1,0 @@
-<launch>
-  <node name="rest_nlp_finish_main" pkg="rest_nlp_finish" type="main.py" output="screen" />
-</launch>

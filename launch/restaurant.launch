@@ -1,0 +1,77 @@
+<launch>
+
+    <node pkg="emergency_stop" name="emergency_stop" output="screen" respawn="false" type="main.py"/>
+    <include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
+
+    <include file="$(find turtlebot_custom)/launch/gmapping_lidar.launch"/>
+    <include file="$(find turtlebot_custom)/launch/lidar.launch"/>
+    <include file="$(find turtlebot_custom)/launch/rviz.launch"/>
+
+  	<include file="$(find respeaker_ros)/launch/respeaker.launch"/>
+
+    <arg name="topic"               default="camera/image_raw" />
+    <arg name="gpu"                 default="false" />
+    <arg name="poses_topic"         default="poses" />
+    <arg name="multiplier"          default="0.5" />
+    <arg name="image_scale_factor"  default="0.5" />
+    <arg name="flip_horizontal"     default="false" />
+    <arg name="output_stride"       default="16" />
+    <arg name="max_pose"            default="5" />
+    <arg name="score_threshold"     default="0.8" />
+    <arg name="nms_radius"          default="20" />
+    <group ns="/">
+        <node pkg="ros_posenet" type="posenet.js" name="posenet" output="screen" respawn="true" >
+            <param name="topic"                 value="$(arg topic)" />
+            <param name="gpu"                   value="$(arg gpu)" />
+            <param name="poses_topic"           value="$(arg poses_topic)" />
+            <param name="multiplier"            value="$(arg multiplier)" />
+            <param name="image_scale_factor"    value="$(arg image_scale_factor)" />
+            <param name="flip_horizontal"       value="$(arg flip_horizontal)" />
+            <param name="output_stride"         value="$(arg output_stride)" />
+            <param name="max_pose"              value="$(arg max_pose)" />
+            <param name="score_threshold"       value="$(arg score_threshold)" />
+            <param name="nms_radius"            value="$(arg nms_radius)" />
+        </node>
+        <node pkg="ros_posenet" name="realsense" output="screen" respawn="true" type="realsense"/>
+    </group>
+    <node pkg="ros_posenet" name="model_server" output="screen" respawn="true" type="server.py"/>
+
+    <group ns="sound_system">
+    	<include file="$(find sound_system)/launch/hotword.launch"/>
+        <node pkg="sound_system" name="speak" output="screen" respawn="false" type="speak.py"/>
+        <node pkg="sound_system" name="sphinx" type="sphinx.py" output="screen">
+            <param name="dict" value="follow_me_sphinx.dict"/>
+            <param name="gram" value="follow_me_sphinx.gram"/>
+        </node>
+        <node pkg="sound_system" name="log" output="screen" respawn="false" type="log.py"/>
+    </group>
+
+    <group ns="move">
+        <node pkg="move" name="velocity" respawn="false" type="velocity"/>
+	    <node pkg="move" name="amount" respawn="false" type="amount"/>
+    </group>
+
+    <node name="nlp_main" pkg="natural_language_processing" type="main.py" output="screen" />
+    <param name="json_name" value="restaurant.json"/>
+
+    <group ns="restaurant">
+        <node name="trigger" pkg="restaurant" output="screen" respawn="false" type="trigger.py"/>
+        <node name="restaurant_judge_bar" pkg="restaurant"  type="judge_bar.py" output="screen"/>
+        <node name="restaurant_start" pkg="restaurant" type="start.py" output="screen" />
+        <node name="restaurant_check_customer" pkg="restaurant" type="check_customer.py" output="screen" />
+        <node name="restaurant_finish_delivery" pkg="restaurant" type="finish_delivery.py" output="screen" />
+        <node name="restaurant_finish_get_order" pkg="restaurant" type="finish_get_order.py" output="screen" />
+        <node name="restaurant_get_order" pkg="restaurant" type="get_order.py" output="screen" />
+        <node name="restaurant_restart_call_ducker" pkg="restaurant" type="restart_call_ducker.py" output="screen" />
+        <node name="restaurant_restart_get_order" pkg="restaurant" type="restart_get_order.py" output="screen" />
+        <node name="restaurant_restart_here_you_are" pkg="restaurant" type="restart_here_you_are.py" output="screen" />
+        <node name="restaurant_call_ducker" pkg="restaurant" type="call_ducker.py" output="screen" />
+    </group>
+
+    <node pkg="location" name="location" type="location_manager.py" output="screen">
+        <param name="info_file" value="mapping.txt"/>
+    </node>
+
+    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
+
+</launch>
