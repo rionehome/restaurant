@@ -237,16 +237,13 @@ class CallDucker:
             self.speak("Please raise your hand.")
             self.flag = False
             
-            while not rospy.is_shutdown():
+            while not self.flag:
                 time.sleep(10)
                 if len(self.raise_hand_persons) == 0:
-                    if not self.flag:
-                        print"失敗"
-                        self.speak("sorry, not found.")
-                        self.flag = True
-                        self.finish_pub.publish(Bool(data=False))
-                    else:
-                        return
+                    print"失敗"
+                    self.speak("sorry, not found.")
+                    self.flag = True
+                    self.finish_pub.publish(Bool(data=False))
     
     def odometry_callback(self, msg):
         # type: (Odometry)->None
