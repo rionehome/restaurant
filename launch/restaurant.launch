@@ -55,6 +55,7 @@
     <param name="json_name" value="restaurant.json"/>
 
     <group ns="restaurant">
+        <node name="trigger" pkg="restaurant" output="screen" respawn="false" type="trigger.py"/>
         <node name="restaurant_judge_bar" pkg="restaurant"  type="judge_bar.py" output="screen"/>
         <node name="restaurant_start" pkg="restaurant" type="start.py" output="screen" />
         <node name="restaurant_check_customer" pkg="restaurant" type="check_customer.py" output="screen" />
