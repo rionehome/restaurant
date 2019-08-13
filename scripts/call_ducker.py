@@ -290,6 +290,7 @@ class CallDucker:
             else:
                 del self.raise_hand_persons[:]
                 print"失敗"
+                self.flag = True
                 self.finish_pub.publish(Bool(data=False))
 
 
