@@ -7,7 +7,7 @@ from move_base_msgs.msg import MoveBaseGoal, MoveBaseAction
 import rospy
 import actionlib
 from sound_system.srv import HotwordService, StringService
-from std_msgs.msg import String, Int32
+from std_msgs.msg import String, Int32, Bool
 from nav_msgs.msg import Odometry
 from ros_posenet.msg import *
 from geometry_msgs.msg import Point, Quaternion
@@ -37,7 +37,7 @@ class CallDucker:
         rospy.Subscriber("/sound_direction", Int32, self.respeaker_callback)
         self.move_base_client = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
         self.amount_client = actionlib.SimpleActionClient("/move/amount", AmountAction)
-        self.raise_hand_position_pub = rospy.Publisher('/restaurant/raise_hand_position', String, queue_size=1)
+        self.finish_pub = rospy.Publisher("/call_ducker/finish", Bool, queue_size=10)
     
     @staticmethod
     def to_angle(rad):
@@ -286,9 +286,11 @@ class CallDucker:
             if status == actionlib.GoalStatus.SUCCEEDED:
                 print "到着"
                 self.flag = True
+                self.finish_pub.publish(Bool(data=True))
             else:
                 del self.raise_hand_persons[:]
                 print"失敗"
+                self.finish_pub.publish(Bool(data=False))
 
 
 if __name__ == '__main__':

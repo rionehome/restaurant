@@ -10,9 +10,10 @@ from abstract_module import AbstractModule
 class RestaurantRestartHereYouAre(AbstractModule):
     def __init__(self):
         super(RestaurantRestartHereYouAre, self).__init__(node_name="restaurant_restart_here_you_are")
-
-        rospy.Subscriber("/natural_language_processing/restart_here_you_are", String, self.restart_here_you_are_callback)
-
+        
+        rospy.Subscriber("/natural_language_processing/restart_here_you_are", String,
+                         self.restart_here_you_are_callback)
+    
     def restart_here_you_are_callback(self, data):
         # type:(String) -> None
         """

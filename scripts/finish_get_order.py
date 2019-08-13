@@ -10,9 +10,9 @@ from abstract_module import AbstractModule
 class RestaurantFinishGetOrder(AbstractModule):
     def __init__(self):
         super(RestaurantFinishGetOrder, self).__init__(node_name="restaurant_finish_get_order")
-
+        
         rospy.Subscriber("/natural_language_processing/finish_get_order", String, self.finish_get_order_callback)
-
+    
     def finish_get_order_callback(self, data):
         # type:(String) -> None
         """
@@ -24,13 +24,13 @@ class RestaurantFinishGetOrder(AbstractModule):
         self.print_node("finish_get_order")
         self.speak("Sure")
         self.send_place_msg("kitchen")
-
+        
         # キッチンに着いた
         self.speak("Order is {}.".format(data.data))
         self.speak("Please give me items.")
         time.sleep(5)
         self.send_place_msg("table")
-
+        
         # テーブルに着いた
         self.speak("Thank you for waiting. Here you are. So, I want you to take items.")
         time.sleep(5)

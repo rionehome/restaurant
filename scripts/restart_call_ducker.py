@@ -9,9 +9,9 @@ from abstract_module import AbstractModule
 class RestaurantRestartCallDucker(AbstractModule):
     def __init__(self):
         super(RestaurantRestartCallDucker, self).__init__(node_name="restaurant_restart_call_ducker")
-
+        
         rospy.Subscriber("/natural_language_processing/restart_call_ducker", String, self.restart_call_ducker_callback)
-
+    
     def restart_call_ducker_callback(self, data):
         # type:(String) -> None
         """

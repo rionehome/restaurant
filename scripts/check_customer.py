@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import rospy
-from std_msgs.msg import String, Bool, Float64MultiArray
+from std_msgs.msg import String, Bool
 
 from abstract_module import AbstractModule
 
@@ -9,12 +9,11 @@ from abstract_module import AbstractModule
 class RestaurantCheckCustomer(AbstractModule):
     def __init__(self):
         super(RestaurantCheckCustomer, self).__init__(node_name="restaurant_check_customer")
-
+        
         self.call_ducker_pub = rospy.Publisher("/call_ducker/control", String, queue_size=10)
-        self.move_velocity_pub = rospy.Publisher("/move/velocity", Float64MultiArray, queue_size=10)
-
-        rospy.Subscriber("/navigation_human_detect/goal", Bool, self.call_ducker_callback)
-
+        
+        rospy.Subscriber("/call_ducker/finish", Bool, self.call_ducker_callback)
+    
     def call_ducker_callback(self, msg):
         # type:(Bool) -> None
         """
@@ -29,28 +28,10 @@ class RestaurantCheckCustomer(AbstractModule):
             speak_sentence = "Are you ready to order?"
             self.speak(speak_sentence)
             self.nlp_pub.publish(speak_sentence)
-
+        
         else:
             self.speak("Sorry.")
-            self.send_place_msg("kitchen")
-
-            self.speak("Sorry, I can not find you. Please call me again.")
-            self.pub_move_velocity(0, 0)
-            self.call_ducker_pub.publish("start")
-
-    def pub_move_velocity(self, straight, turn):
-        """
-        速度情報を送信
-        :param straight:
-        :param turn:
-        :return:
-        """
-        array = Float64MultiArray()
-        array.data.append(straight)
-        array.data.append(0.03)
-        array.data.append(turn)
-        array.data.append(0.5)
-        self.move_velocity_pub.publish(array)
+            print "お客さんの前に運んでください。"
 
 
 if __name__ == '__main__':

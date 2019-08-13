@@ -12,11 +12,11 @@ from abstract_module import AbstractModule
 class RestaurantStart(AbstractModule):
     def __init__(self):
         super(RestaurantStart, self).__init__(node_name="restaurant_start")
-
+        
         self.call_ducker_pub = rospy.Publisher("/call_ducker/control", String, queue_size=10)
-
+        
         rospy.Subscriber("/natural_language_processing/start", String, self.start_callback)
-
+    
     def start_callback(self, data):
         # type: (String) -> None
         """
@@ -27,17 +27,22 @@ class RestaurantStart(AbstractModule):
         :return: なし
         """
         self.print_node("start")
-
+        
         time.sleep(3)
-
+        
         rospy.wait_for_service("/rest_judge_bar/detect", timeout=1)
         rospy.ServiceProxy("/rest_judge_bar/detect", StringService)()
-
+        
         time.sleep(3)
-
-        rospy.wait_for_service("/location/register_current_location", timeout=1)
-        rospy.ServiceProxy("/location/register_current_location", RegisterLocation)("kitchen")
-
+        
+        # locationに車の位置を記録
+        try:
+            rospy.wait_for_service('/location/register_current_location', timeout=1)
+            rospy.ServiceProxy('/location/register_current_location', RegisterLocation)("kitchen")
+            print "登録しました。"
+        except rospy.ROSException:
+            print "Error, not find location node."
+        
         self.speak("When ordering, please say, hey ducker.")
         # call_duckerにメッセージを送信
         self.call_ducker_pub.publish("start")

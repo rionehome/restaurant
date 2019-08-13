@@ -9,9 +9,9 @@ from abstract_module import AbstractModule
 class RestaurantRestartGetOrder(AbstractModule):
     def __init__(self):
         super(RestaurantRestartGetOrder, self).__init__(node_name="restaurant_restart_get_order")
-
+        
         rospy.Subscriber("/natural_language_processing/restart_get_order", String, self.restart_get_order_callback)
-
+    
     def restart_get_order_callback(self, data):
         # type:(String) -> None
         """
