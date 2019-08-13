@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: UTF-8
 import math
+import time
 
 from move.msg import AmountGoal, AmountAction
 from move_base_msgs.msg import MoveBaseGoal, MoveBaseAction
@@ -234,6 +235,17 @@ class CallDucker:
             self.turn_sound_source()
             self.speak("Please raise your hand.")
             self.flag = False
+            
+            while True:
+                time.sleep(10)
+                if len(self.raise_hand_persons) == 0:
+                    if not self.flag:
+                        print"失敗"
+                        self.speak("sorry, not found.")
+                        self.flag = True
+                        self.finish_pub.publish(Bool(data=False))
+                    else:
+                        return
     
     def odometry_callback(self, msg):
         # type: (Odometry)->None
