@@ -3,11 +3,16 @@
 	<include file="$(find turtlebot_custom)/launch/gmapping_lidar.launch"/>
 	<include file="$(find turtlebot_custom)/launch/lidar.launch"/>
     <include file="$(find turtlebot_custom)/launch/rviz.launch"/>
-    <!-- 	<include file="$(find respeaker_ros)/launch/respeaker.launch"/> -->
-    <node pkg="restaurant" name="raise_hand" type="raise_hand.py" output="screen"/>
-    <node pkg="mapping" name="mapping_load" type="load.py" output="screen">
-        <param name="info_file" value="mapping"/>
-    </node>
+    <include file="$(find respeaker_ros)/launch/respeaker.launch"/>
+    <node pkg="restaurant" name="call_ducker" type="call_ducker.py" output="screen"/>
+
+    <node pkg="sound_system" name="speak" type="speak.py" output="screen"/>
+    <node pkg="sound_system" name="hotword" type="hotword_detector.py" output="screen"/>
+
+    <group ns="move">
+        <node pkg="move" name="velocity" respawn="false" type="velocity"/>
+	    <node pkg="move" name="amount" respawn="false" type="amount"/>
+    </group>
 
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
     <arg name="topic"               default="camera/image_raw" />
