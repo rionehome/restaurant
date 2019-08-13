@@ -230,13 +230,14 @@ class CallDucker:
     def control_callback(self, msg):
         # type:(String)->None
         if msg.data == "start":
+            del self.raise_hand_persons[:]
             # 音源定位
             self.hot_word()
             self.turn_sound_source()
             self.speak("Please raise your hand.")
             self.flag = False
             
-            while True:
+            while not rospy.is_shutdown():
                 time.sleep(10)
                 if len(self.raise_hand_persons) == 0:
                     if not self.flag:
