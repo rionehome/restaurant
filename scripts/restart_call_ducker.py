@@ -23,6 +23,8 @@ class RestaurantRestartCallDucker(AbstractModule):
         self.print_node("restart_call_ducker")
         self.speak("Sorry.")
         self.send_place_msg("kitchen")
+        # call_duckerにメッセージを送信
+        self.call_ducker_pub.publish("start")
 
 
 if __name__ == '__main__':
