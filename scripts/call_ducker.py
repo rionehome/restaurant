@@ -2,7 +2,6 @@
 # coding: UTF-8
 import math
 import numpy as np
-import time
 
 from move.msg import AmountGoal, AmountAction
 from move_base_msgs.msg import MoveBaseGoal, MoveBaseAction
@@ -26,12 +25,12 @@ class CallDucker:
         self.sensor_x = 0
         self.sensor_y = 0
         self.sensor_rad = 0
-        self.flag = True
+        self.get_pose_flag = False
+        self.status = None
         self.marker = RvizMarker()
         self.raise_hand_persons = []
         self.sound_source_angle_list = []
         self.se = SE()
-        self.detection = False
         
         rospy.init_node("raise_hand_human")
         rospy.Subscriber("/ros_posenet/result", Poses, self.pose_callback, queue_size=1)
@@ -232,23 +231,24 @@ class CallDucker:
     def control_callback(self, msg):
         # type:(String)->None
         if msg.data == "start":
-            del self.raise_hand_persons[:]
-            self.detection = False
-            # 音源定位
-            self.hot_word()
-            self.turn_sound_source()
-            self.speak("Please raise your hand.")
-            self.flag = False
-            
-            while not self.flag:
-                time.sleep(10)
-                if not self.detection:
-                    print"失敗"
-                    self.speak("sorry, not found.")
-                    self.flag = True
-                    self.finish_pub.publish(Bool(data=False))
+            for i in range(5):
+                del self.raise_hand_persons[:]
+                self.status = None
+                # 音源定位
+                self.hot_word()
+                self.turn_sound_source()
+                self.speak("Please raise your hand.")
+                self.get_pose_flag = True
+                while self.status is None:
+                    pass
+                if self.status == actionlib.GoalStatus.SUCCEEDED:
+                    self.finish_pub.publish(Bool(data=True))
+                    return
+                else:
+                    self.speak("The destination could not be set. Please call, 'Hey, Ducker.' again.")
+            self.finish_pub.publish(Bool(data=False))
         else:
-            self.flag = True
+            self.get_pose_flag = False
     
     def odometry_callback(self, msg):
         # type: (Odometry)->None
@@ -268,7 +268,7 @@ class CallDucker:
         :param msgs:
         :return:
         """
-        if self.flag:
+        if not self.get_pose_flag:
             return
         
         person_position = {}
@@ -295,19 +295,16 @@ class CallDucker:
             self.raise_hand_persons.append(self.calc_real_position(person_position[min(person_position)]))
             print "発見"
             self.se.play(self.se.DISCOVERY)
-            self.detection = True
         else:
             result = self.calc_raise_person_position(self.raise_hand_persons)
-            status = self.send_move_base((result[0], result[1], 0))
-            if status == actionlib.GoalStatus.SUCCEEDED:
+            self.status = self.send_move_base((result[0], result[1], 0))
+            if self.status == actionlib.GoalStatus.SUCCEEDED:
                 print "到着"
-                self.flag = True
-                self.finish_pub.publish(Bool(data=True))
+                self.get_pose_flag = False
             else:
                 del self.raise_hand_persons[:]
                 print"失敗"
-                self.flag = True
-                self.finish_pub.publish(Bool(data=False))
+                self.get_pose_flag = False
 
 
 if __name__ == '__main__':
