@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: UTF-8
 import math
+import numpy as np
 import time
 
 from move.msg import AmountGoal, AmountAction
@@ -30,6 +31,7 @@ class CallDucker:
         self.raise_hand_persons = []
         self.sound_source_angle_list = []
         self.se = SE()
+        self.detection = False
         
         rospy.init_node("raise_hand_human")
         rospy.Subscriber("/ros_posenet/result", Poses, self.pose_callback, queue_size=1)
@@ -49,8 +51,8 @@ class CallDucker:
         return (angle * math.pi) / 180
     
     @staticmethod
-    def to_quaternion_ang(w, z):
-        return math.acos(w) * 2 * z
+    def to_quaternion_rad(w, z):
+        return math.acos(w) * 2 * np.sign(z)
     
     def send_move_base(self, point):
         # type:(tuple)->int
@@ -231,6 +233,7 @@ class CallDucker:
         # type:(String)->None
         if msg.data == "start":
             del self.raise_hand_persons[:]
+            self.detection = False
             # 音源定位
             self.hot_word()
             self.turn_sound_source()
@@ -239,11 +242,13 @@ class CallDucker:
             
             while not self.flag:
                 time.sleep(10)
-                if len(self.raise_hand_persons) == 0:
+                if not self.detection:
                     print"失敗"
                     self.speak("sorry, not found.")
                     self.flag = True
                     self.finish_pub.publish(Bool(data=False))
+        else:
+            self.flag = True
     
     def odometry_callback(self, msg):
         # type: (Odometry)->None
@@ -254,7 +259,7 @@ class CallDucker:
         """
         self.sensor_x = msg.pose.pose.position.x
         self.sensor_y = msg.pose.pose.position.y
-        self.sensor_rad = self.to_quaternion_ang(msg.pose.pose.orientation.w, msg.pose.pose.orientation.z)
+        self.sensor_rad = self.to_quaternion_rad(msg.pose.pose.orientation.w, msg.pose.pose.orientation.z)
     
     def pose_callback(self, msgs):
         # type: (Poses)->None
@@ -290,6 +295,7 @@ class CallDucker:
             self.raise_hand_persons.append(self.calc_real_position(person_position[min(person_position)]))
             print "発見"
             self.se.play(self.se.DISCOVERY)
+            self.detection = True
         else:
             result = self.calc_raise_person_position(self.raise_hand_persons)
             status = self.send_move_base((result[0], result[1], 0))

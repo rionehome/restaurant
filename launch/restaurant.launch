@@ -7,7 +7,9 @@
     <include file="$(find turtlebot_custom)/launch/lidar.launch"/>
     <include file="$(find turtlebot_custom)/launch/rviz.launch"/>
 
-  	<include file="$(find respeaker_ros)/launch/respeaker.launch"/>
+    <node name="respeaker_node" pkg="respeaker_ros" output="screen" type="respeaker_node.py"/>
+    <node name="static_transformer" pkg="tf" type="static_transform_publisher"
+        args="0 0 0 0 0 0 map respeaker_base 100"/>
 
     <arg name="topic"               default="camera/image_raw" />
     <arg name="gpu"                 default="false" />
