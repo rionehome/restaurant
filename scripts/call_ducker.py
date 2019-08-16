@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: UTF-8
 import math
+import time
+
 import numpy as np
 
 from move.msg import AmountGoal, AmountAction
@@ -25,20 +27,19 @@ class CallDucker:
         self.sensor_x = 0
         self.sensor_y = 0
         self.sensor_rad = 0
-        self.get_pose_flag = False
         self.status = None
         self.marker = RvizMarker()
-        self.raise_hand_persons = []
         self.sound_source_angle_list = []
         self.se = SE()
         
         rospy.init_node("raise_hand_human")
-        rospy.Subscriber("/ros_posenet/result", Poses, self.pose_callback, queue_size=1)
+        rospy.Subscriber("/tfpose_ros/result", Poses, self.pose_callback, queue_size=1)
         rospy.Subscriber("/call_ducker/control", String, self.control_callback, queue_size=1)
         rospy.Subscriber("/odom", Odometry, self.odometry_callback)
         rospy.Subscriber("/sound_direction", Int32, self.respeaker_callback)
         self.move_base_client = actionlib.SimpleActionClient("/move_base", MoveBaseAction)
         self.amount_client = actionlib.SimpleActionClient("/move/amount", AmountAction)
+        self.shutter_pub = rospy.Publisher("/tfpose_ros/shutter", String, queue_size=10)
         self.finish_pub = rospy.Publisher("/call_ducker/finish", Bool, queue_size=10)
     
     @staticmethod
@@ -135,24 +136,6 @@ class CallDucker:
             print "countが0 @raise_hand"
         return None
     
-    def calc_raise_person_position(self, persons):
-        """
-        手を上げている人の3D場所を計算
-        :return:
-        """
-        sum_x = 0
-        sum_y = 0
-        for person in persons:
-            sum_x += person[0]
-            sum_y += person[1]
-        ave_x = sum_x / len(persons)
-        ave_y = sum_y / len(persons)
-        
-        result = self.calc_safe_position(MARGIN, (ave_x, ave_y))
-        
-        print result
-        return result[0], result[1]
-    
     @staticmethod
     def is_raise_hand(key_points):
         # type: (dict)->bool
@@ -232,13 +215,13 @@ class CallDucker:
         # type:(String)->None
         if msg.data == "start":
             for i in range(5):
-                del self.raise_hand_persons[:]
                 self.status = None
                 # 音源定位
                 self.hot_word()
                 self.turn_sound_source()
                 self.speak("Please raise your hand.")
-                self.get_pose_flag = True
+                self.shutter_pub.publish(String(data="take"))
+                time.sleep(3)
                 while self.status is None:
                     pass
                 if self.status == actionlib.GoalStatus.SUCCEEDED:
@@ -247,8 +230,6 @@ class CallDucker:
                 else:
                     self.speak("The destination could not be set. Please call, 'Hey, Ducker.' again.")
             self.finish_pub.publish(Bool(data=False))
-        else:
-            self.get_pose_flag = False
     
     def odometry_callback(self, msg):
         # type: (Odometry)->None
@@ -268,9 +249,6 @@ class CallDucker:
         :param msgs:
         :return:
         """
-        if not self.get_pose_flag:
-            return
-        
         person_position = {}
         for pose in msgs.poses:
             
@@ -284,27 +262,20 @@ class CallDucker:
         
         # 手を上げている一番近い人間
         if len(person_position) == 0:
-            del self.raise_hand_persons[:]
             return
         if min(person_position) < MARGIN:
             print "人間が近すぎます"
-            del self.raise_hand_persons[:]
             return
         
-        if len(self.raise_hand_persons) < 10:
-            self.raise_hand_persons.append(self.calc_real_position(person_position[min(person_position)]))
-            print "発見"
-            self.se.play(self.se.DISCOVERY)
+        print "発見"
+        self.se.play(self.se.DISCOVERY)
+        real_position = self.calc_real_position(person_position[min(person_position)])
+        result = self.calc_safe_position(MARGIN, (real_position[0], real_position[1]))
+        self.status = self.send_move_base((result[0], result[1], 0))
+        if self.status == actionlib.GoalStatus.SUCCEEDED:
+            print "到着"
         else:
-            result = self.calc_raise_person_position(self.raise_hand_persons)
-            self.status = self.send_move_base((result[0], result[1], 0))
-            if self.status == actionlib.GoalStatus.SUCCEEDED:
-                print "到着"
-                self.get_pose_flag = False
-            else:
-                del self.raise_hand_persons[:]
-                print"失敗"
-                self.get_pose_flag = False
+            print"失敗"
 
 
 if __name__ == '__main__':
