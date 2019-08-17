@@ -17,7 +17,7 @@ from geometry_msgs.msg import Point, Quaternion
 from module.rviz_marker import RvizMarker
 from module.se import SE
 
-MARGIN = 0.8
+MARGIN = 0.95
 
 
 class CallDucker:
@@ -217,13 +217,14 @@ class CallDucker:
         if msg.data == "start":
             for i in range(5):
                 self.status = None
+                self.failed = False
                 # 音源定位
                 self.hot_word()
                 self.turn_sound_source()
                 self.speak("Please raise your hand.")
                 self.shutter_pub.publish(String(data="take"))
-                print "シャッター"
                 time.sleep(3)
+                print "シャッター"
                 while self.status is None and not self.failed:
                     print self.status
                     print self.failed
