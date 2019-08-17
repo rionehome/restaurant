@@ -172,8 +172,8 @@ class CallDucker:
         relative_x = point[2]
         relative_y = -point[0]
         
-        x = relative_x * math.cos(relative_theta) - relative_y * math.sin(relative_theta)
-        y = relative_x * math.sin(relative_theta) + relative_y * math.cos(relative_theta)
+        x = (relative_x * math.cos(relative_theta) - relative_y * math.sin(relative_theta)) + self.sensor_x
+        y = (relative_x * math.sin(relative_theta) + relative_y * math.cos(relative_theta)) + self.sensor_y
         print "real", x, y
         return x, y
     
