@@ -31,6 +31,7 @@ class CallDucker:
         self.marker = RvizMarker()
         self.sound_source_angle_list = []
         self.se = SE()
+        self.failed = False
         
         rospy.init_node("raise_hand_human")
         rospy.Subscriber("/tfpose_ros/result", Poses, self.pose_callback, queue_size=1)
@@ -221,9 +222,15 @@ class CallDucker:
                 self.turn_sound_source()
                 self.speak("Please raise your hand.")
                 self.shutter_pub.publish(String(data="take"))
+                print "シャッター"
                 time.sleep(3)
-                while self.status is None:
+                while self.status is None and not self.failed:
+                    print self.status
+                    print self.failed
                     pass
+                if self.status is None:
+                    self.speak("I am sorry, not found you. Please call, 'Hey, Ducker.' again.")
+                    continue
                 if self.status == actionlib.GoalStatus.SUCCEEDED:
                     self.finish_pub.publish(Bool(data=True))
                     return
@@ -262,9 +269,12 @@ class CallDucker:
         
         # 手を上げている一番近い人間
         if len(person_position) == 0:
+            print "誰もいない"
+            self.failed = True
             return
         if min(person_position) < MARGIN:
             print "人間が近すぎます"
+            self.failed = True
             return
         
         print "発見"
@@ -276,6 +286,7 @@ class CallDucker:
             print "到着"
         else:
             print"失敗"
+            self.failed = True
 
 
 if __name__ == '__main__':
