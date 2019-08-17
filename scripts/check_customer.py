@@ -28,9 +28,8 @@ class RestaurantCheckCustomer(AbstractModule):
             speak_sentence = "Are you ready to order?"
             self.speak(speak_sentence)
             self.nlp_pub.publish(speak_sentence)
-        
         else:
-            self.speak("Sorry.")
+            self.speak("Sorry, Please carry it in front of the customer.")
             print "お客さんの前に運んでください。"
 
 
