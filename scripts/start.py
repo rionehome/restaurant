@@ -5,6 +5,7 @@ from std_msgs.msg import String
 from location.srv import RegisterLocation
 from sound_system.srv import StringService
 import time
+from module import se
 
 from abstract_module import AbstractModule
 
@@ -14,7 +15,7 @@ class RestaurantStart(AbstractModule):
         super(RestaurantStart, self).__init__(node_name="restaurant_start")
         
         self.call_ducker_pub = rospy.Publisher("/call_ducker/control", String, queue_size=10)
-        
+        self.se = se.SE()
         rospy.Subscriber("/natural_language_processing/start", String, self.start_callback)
     
     def start_callback(self, data):
@@ -26,6 +27,7 @@ class RestaurantStart(AbstractModule):
         :param data: ""
         :return: なし
         """
+        self.se.play(self.se.DISCOVERY)
         self.print_node("start")
         
         time.sleep(3)

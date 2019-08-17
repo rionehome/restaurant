@@ -4,45 +4,27 @@
 	<include file="$(find turtlebot_custom)/launch/lidar.launch"/>
     <include file="$(find turtlebot_custom)/launch/rviz.launch"/>
   <node name="respeaker_node" pkg="respeaker_ros"  type="respeaker_node.py"/>
-
   <node name="static_transformer" pkg="tf" type="static_transform_publisher"
         args="0 0 0 0 0 0 map respeaker_base 100"/>
-        <node pkg="restaurant" name="call_ducker" type="call_ducker.py" output="screen"/>
 
-    <node pkg="sound_system" name="speak" type="speak.py" output="screen"/>
-    <node pkg="sound_system" name="hotword" type="hotword_detector.py" output="screen"/>
+  <node pkg="restaurant" name="call_ducker" type="call_ducker.py" output="screen"/>
 
-    <group ns="move">
-        <node pkg="move" name="velocity" respawn="false" type="velocity"/>
-	    <node pkg="move" name="amount" respawn="false" type="amount"/>
-    </group>
+  <node pkg="sound_system" name="speak" type="speak.py" output="screen"/>
+  <node pkg="sound_system" name="hotword" type="hotword_detector.py" output="screen"/>
 
-    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
-    <arg name="topic"               default="camera/image_raw" />
-    <arg name="gpu"                 default="false" />
-    <arg name="poses_topic"         default="poses" />
-    <arg name="multiplier"          default="0.5" />
-    <arg name="image_scale_factor"  default="0.5" />
-    <arg name="flip_horizontal"     default="false" />
-    <arg name="output_stride"       default="16" />
-    <arg name="max_pose"            default="5" />
-    <arg name="score_threshold"     default="0.5" />
-    <arg name="nms_radius"          default="20" />
-    <group ns="/">
-        <node pkg="ros_posenet" type="posenet.js" name="posenet" output="screen" respawn="true" >
-            <param name="topic"                 value="$(arg topic)" />
-            <param name="gpu"                   value="$(arg gpu)" />
-            <param name="poses_topic"           value="$(arg poses_topic)" />
-            <param name="multiplier"            value="$(arg multiplier)" />
-            <param name="image_scale_factor"    value="$(arg image_scale_factor)" />
-            <param name="flip_horizontal"       value="$(arg flip_horizontal)" />
-            <param name="output_stride"         value="$(arg output_stride)" />
-            <param name="max_pose"              value="$(arg max_pose)" />
-            <param name="score_threshold"       value="$(arg score_threshold)" />
-            <param name="nms_radius"            value="$(arg nms_radius)" />
-        </node>
-        <node pkg="ros_posenet" name="realsense" output="screen" respawn="true" type="realsense"/>
-    </group>
-    <node pkg="ros_posenet" name="model_server" output="screen" respawn="true" type="server.py"/>
+  <group ns="move">
+     <node pkg="move" name="velocity" respawn="false" type="velocity"/>
+     <node pkg="move" name="amount" respawn="false" type="amount"/>
+  </group>
+
+  <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
+
+  <node name="pose_estimator" pkg="tfpose_ros" type="broadcaster_ros.py" output="screen" required="true">
+      <env name="CUDA_VISIBLE_DEVICES" value="0" />
+      <param name="model" value="mobilenet_v2_large" />
+      <param name="resolution" value="640x480" />
+  </node>
+  <node name="realsense" pkg="tfpose_ros" type="tf_pose_realsense_once" output="screen" required="true"/>
+
 
 </launch>
